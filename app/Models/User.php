@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -19,6 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
 
@@ -42,6 +44,30 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => UserRole::class,
         ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function roles(): array
+    {
+        return UserRole::values();
+    }
+
+    public function isLecturer(): bool
+    {
+        return $this->role === UserRole::Lecturer;
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role === UserRole::Student;
+    }
+
+    public function roleLabel(): string
+    {
+        return $this->role->label();
     }
 }
