@@ -100,9 +100,11 @@ Open 👉 `http://localhost:8000`
 
 ## 🧪 Tests
 
-Tests use a separate database (`yp_exam_portal_testing`) configured in `.env.testing`. Create it once:
+Tests use a separate database (`yp_exam_portal_testing`). Setup once:
 
 ```bash
+cp .env.testing.example .env.testing
+php artisan key:generate --env=testing
 mysql -u root -e "CREATE DATABASE yp_exam_portal_testing;"
 php artisan test
 ```
