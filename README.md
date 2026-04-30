@@ -32,7 +32,8 @@ Build a portal for online examination + student management with:
 ## 🛠️ Tech Stack
 
 - **Laravel 11**
-- **Laravel Breeze** (auth scaffold, Blade)
+- **Laravel Breeze** (auth scaffold, Vue + Inertia stack)
+- **Vue 3** + **Inertia.js**
 - **MySQL**
 - **Tailwind CSS** + **Vite**
 
@@ -49,25 +50,28 @@ Build a portal for online examination + student management with:
 
 ### Setup
 
+**1. Clone**
+
 ```bash
-# 1. Clone
 git clone https://github.com/syazsolo/yp-exam-portal.git
 cd yp-exam-portal
+```
 
-# 2. Install PHP deps
+**2. Install dependencies**
+
+```bash
 composer install
-
-# 3. Install JS deps
 npm install
+```
 
-# 4. Environment
+**3. Environment**
+
+```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-### Configure DB
-
-Edit `.env`:
+**4. Configure DB** — edit `.env`:
 
 ```env
 DB_CONNECTION=mysql
@@ -78,23 +82,33 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Create the database, then:
+**5. Create the database**, then run migrations + seeders:
 
 ```bash
 php artisan migrate --seed
 ```
 
-### Run It
+**6. Start the servers** — two terminals (Laravel + Vite for Vue/Inertia hot reload):
 
 ```bash
-# Terminal 1 — Laravel
+# Terminal 1
 php artisan serve
 
-# Terminal 2 — Vite
+# Terminal 2
 npm run dev
 ```
 
-Open 👉 `http://localhost:8000`
+**7. Open** 👉 `http://localhost:8000`
+
+---
+
+### Production build
+
+For a one-off frontend build:
+
+```bash
+npm run build
+```
 
 ---
 
@@ -105,14 +119,21 @@ Tests use a separate database (`yp_exam_portal_testing`). Setup once:
 ```bash
 cp .env.testing.example .env.testing
 php artisan key:generate --env=testing
-mysql -u root -e "CREATE DATABASE yp_exam_portal_testing;"
-php artisan test
+# create the test database (yp_exam_portal_testing) in your DB of choice
+```
+
+Then any time:
+
+```bash
+php artisan test          # run the suite
+composer ci               # pint --test + tests + frontend build
+composer pint             # format PHP
 ```
 
 ---
 
 ## 📌 Status
 
-🚧 **Work in progress.** Currently scaffolded with Laravel 11 + Breeze. Features will land iteratively over the 4-day window.
+🚧 **Work in progress.** Currently scaffolded with Laravel 11 + Breeze (Vue + Inertia). Role-based auth (Lecturer / Student) landed. Exam/class/subject features land iteratively over the 4-day window.
 
 This README will be updated as the project grows.
