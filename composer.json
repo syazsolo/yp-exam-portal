@@ -6,8 +6,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^11.0",
-        "laravel/tinker": "^2.9"
+        "laravel/sanctum": "^4.0",
+        "laravel/tinker": "^2.9",
+        "tightenco/ziggy": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -46,7 +49,23 @@
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
             "@php artisan migrate --ansi"
+        ],
+        "pint": "pint",
+        "pint:test": "pint --test",
+        "test": "@php artisan test",
+        "build": "npm run build",
+        "ci": [
+            "@pint:test",
+            "@test",
+            "@build"
         ]
+    },
+    "scripts-descriptions": {
+        "pint": "Format PHP code with Laravel Pint.",
+        "pint:test": "Check PHP formatting without applying changes.",
+        "test": "Run the PHPUnit test suite via artisan.",
+        "build": "Build frontend assets with Vite.",
+        "ci": "Run the full CI pipeline: format check, tests, frontend build."
     },
     "extra": {
         "branch-alias": {
