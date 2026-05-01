@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -13,7 +12,7 @@ class DashboardRoleTest extends TestCase
 
     public function test_lecturer_dashboard_exposes_lecturer_role(): void
     {
-        $user = User::factory()->lecturer()->create();
+        $user = $this->createLecturer();
 
         $response = $this->actingAs($user)->get('/dashboard');
 
@@ -26,7 +25,7 @@ class DashboardRoleTest extends TestCase
 
     public function test_student_dashboard_exposes_student_role(): void
     {
-        $user = User::factory()->student()->create();
+        $user = $this->createStudent();
 
         $response = $this->actingAs($user)->get('/dashboard');
 
