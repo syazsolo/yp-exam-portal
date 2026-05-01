@@ -1,13 +1,16 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const page       = usePage();
+const isLecturer = computed(() => page.props.auth.user?.role === 'lecturer');
+const homeRoute  = computed(() => isLecturer.value ? route('lecturer.dashboard') : route('student.dashboard'));
 </script>
 
 <template>
@@ -22,23 +25,23 @@ const showingNavigationDropdown = ref(false);
                         <div class="flex">
                             <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
+                                <Link :href="homeRoute">
+                                    <ApplicationLogo class="block h-9 w-auto fill-current text-gray-800" />
                                 </Link>
                             </div>
 
                             <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <template v-if="isLecturer">
+                                    <NavLink :href="route('lecturer.dashboard')" :active="route().current('lecturer.dashboard')">Overview</NavLink>
+                                    <NavLink :href="route('lecturer.exams.index')" :active="route().current('lecturer.exams.*')">Exams</NavLink>
+                                    <NavLink :href="route('lecturer.classes.index')" :active="route().current('lecturer.classes.*')">Classes</NavLink>
+                                    <NavLink :href="route('lecturer.subjects.index')" :active="route().current('lecturer.subjects.*')">Subjects</NavLink>
+                                </template>
+                                <template v-else>
+                                    <NavLink :href="route('student.dashboard')" :active="route().current('student.dashboard')">Dashboard</NavLink>
+                                    <NavLink :href="route('student.exams.index')" :active="route().current('student.exams.*')">Available Exams</NavLink>
+                                </template>
                             </div>
                         </div>
 
@@ -140,12 +143,16 @@ const showingNavigationDropdown = ref(false);
                     class="sm:hidden"
                 >
                     <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                        <template v-if="isLecturer">
+                            <ResponsiveNavLink :href="route('lecturer.dashboard')" :active="route().current('lecturer.dashboard')">Overview</ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('lecturer.exams.index')" :active="route().current('lecturer.exams.*')">Exams</ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('lecturer.classes.index')" :active="route().current('lecturer.classes.*')">Classes</ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('lecturer.subjects.index')" :active="route().current('lecturer.subjects.*')">Subjects</ResponsiveNavLink>
+                        </template>
+                        <template v-else>
+                            <ResponsiveNavLink :href="route('student.dashboard')" :active="route().current('student.dashboard')">Dashboard</ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('student.exams.index')" :active="route().current('student.exams.*')">Available Exams</ResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->

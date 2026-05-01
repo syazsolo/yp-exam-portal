@@ -24,11 +24,14 @@ class RegisteredUserController extends Controller
     public function create(): Response
     {
         return Inertia::render('Auth/Register', [
-            'roles' => collect(UserRole::cases())->map(fn ($r) => [
-                'value' => $r->value,
-                'label' => $r->label(),
-                'description' => $r->description(),
-            ])->all(),
+            'roles' => collect(UserRole::cases())
+                ->reject(fn ($r) => $r === UserRole::Admin)
+                ->values()
+                ->map(fn ($r) => [
+                    'value' => $r->value,
+                    'label' => $r->label(),
+                    'description' => $r->description(),
+                ])->all(),
         ]);
     }
 
