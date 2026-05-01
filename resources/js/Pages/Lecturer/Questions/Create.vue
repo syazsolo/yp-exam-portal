@@ -1,0 +1,80 @@
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import { Head, useForm, Link } from '@inertiajs/vue3'
+import { ref, watch } from 'vue'
+
+const props = defineProps({ exam: Object })
+const form  = useForm({
+    type:           'mcq',
+    body:           '',
+    points:         1,
+    options:        [{ body: '' }, { body: '' }, { body: '' }, { body: '' }],
+    correct_option: 0,
+})
+
+function addOption()    { form.options.push({ body: '' }) }
+function removeOption(i){ if (form.options.length > 2) form.options.splice(i, 1) }
+function submit()       { form.post(route('lecturer.exams.questions.store', props.exam.id)) }
+</script>
+
+<template>
+    <Head title="Add Question" />
+    <AuthenticatedLayout>
+        <template #header>
+            <div class="flex items-center gap-3">
+                <Link :href="route('lecturer.exams.show', exam.id)" class="text-gray-400 hover:text-gray-600 text-sm">← {{ exam.title }}</Link>
+                <h2 class="text-xl font-semibold text-gray-800">Add Question</h2>
+            </div>
+        </template>
+        <div class="py-8 max-w-2xl mx-auto px-4">
+            <div class="bg-white border rounded-lg p-6 space-y-5">
+
+                <!-- type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Question Type</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" v-model="form.type" value="mcq" /> Multiple Choice
+                        </label>
+                        <label class="flex items-center gap-2 text-sm cursor-pointer">
+                            <input type="radio" v-model="form.type" value="open_text" /> Open Text
+                        </label>
+                    </div>
+                </div>
+
+                <!-- body -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
+                    <textarea v-model="form.body" rows="3" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                    <p v-if="form.errors.body" class="text-red-600 text-xs mt-1">{{ form.errors.body }}</p>
+                </div>
+
+                <!-- points -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Points</label>
+                    <input v-model="form.points" type="number" min="1" class="w-32 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                </div>
+
+                <!-- mcq options -->
+                <div v-if="form.type === 'mcq'">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Options <span class="text-gray-400 font-normal text-xs">(select the correct one)</span></label>
+                    <div class="space-y-2">
+                        <div v-for="(opt, i) in form.options" :key="i" class="flex items-center gap-2">
+                            <input type="radio" :value="i" v-model="form.correct_option" />
+                            <input v-model="opt.body" type="text" :placeholder="`Option ${i+1}`"
+                                class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                            <button v-if="form.options.length > 2" @click="removeOption(i)" class="text-red-400 text-xs hover:text-red-600">✕</button>
+                        </div>
+                    </div>
+                    <button @click="addOption" class="mt-2 text-xs text-gray-500 hover:underline">+ Add option</button>
+                    <p v-if="form.errors.options" class="text-red-600 text-xs mt-1">{{ form.errors.options }}</p>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button @click="submit" :disabled="form.processing" class="bg-gray-900 text-white text-sm px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50">Save Question</button>
+                    <Link :href="route('lecturer.exams.show', exam.id)" class="text-sm text-gray-500 hover:underline self-center">Cancel</Link>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>
