@@ -9,101 +9,148 @@ const props = defineProps({
     pendingReviews: Number,
 })
 
-const statusClass = (s) => ({
-    active: 'bg-green-100 text-green-800',
-    closed: 'bg-red-100 text-red-800',
-    draft:  'bg-gray-100 text-gray-600',
-}[s] ?? 'bg-gray-100 text-gray-600')
+const statusStyle = {
+    active: { dot: 'bg-emerald-600', text: 'text-emerald-700', bg: 'bg-emerald-50' },
+    draft:  { dot: 'bg-ink-mute',    text: 'text-ink-mute',    bg: 'bg-ivory-200' },
+    closed: { dot: 'bg-oxblood',     text: 'text-oxblood',     bg: 'bg-oxblood/5' },
+}
+const badgeFor = (s) => statusStyle[s] || statusStyle.draft
 </script>
 
 <template>
     <Head title="Overview" />
     <AuthenticatedLayout>
-        <template #header><h2 class="text-xl font-semibold text-gray-800">Overview</h2></template>
 
-        <div class="py-8 max-w-6xl mx-auto px-4 space-y-8">
-
-            <!-- flash -->
-            <div v-if="$page.props.flash?.success" class="bg-green-50 border border-green-200 text-green-800 rounded px-4 py-2 text-sm">
-                {{ $page.props.flash.success }}
-            </div>
-
-            <!-- pending reviews banner -->
-            <div v-if="pendingReviews > 0" class="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded px-4 py-2 text-sm">
-                {{ pendingReviews }} session(s) awaiting open-text review.
-            </div>
-
-            <!-- stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div v-for="(item, key) in [
-                    { label: 'Active Exams', value: stats.active_exams, sub: 'Currently running' },
-                    { label: 'Total Exams',  value: stats.total_exams,  sub: 'All time' },
-                    { label: 'Classes',      value: stats.classes,      sub: 'Active groups' },
-                    { label: 'Students',     value: stats.students,     sub: 'Across all classes' },
-                ]" :key="key" class="bg-white border rounded-lg p-5">
-                    <p class="text-xs uppercase tracking-wide text-gray-400">{{ item.label }}</p>
-                    <p class="text-4xl font-bold mt-1" :class="key === 0 ? 'text-red-800' : 'text-gray-900'">{{ item.value }}</p>
-                    <p class="text-xs text-gray-400 mt-1">{{ item.sub }}</p>
-                </div>
-            </div>
-
-            <!-- recent exams -->
+        <!-- Top bar -->
+        <div class="flex flex-col gap-3 border-b border-rule px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-9 sm:py-6">
             <div>
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-semibold text-gray-700">Recent Exams</h3>
-                    <Link :href="route('lecturer.exams.index')" class="text-sm text-gray-500 hover:text-gray-700">View all →</Link>
-                </div>
-                <div class="bg-white border rounded-lg overflow-hidden">
-                    <table class="w-full text-sm">
-                        <thead class="bg-gray-50 text-xs text-gray-400 uppercase tracking-wide">
-                            <tr>
-                                <th class="px-4 py-3 text-left">Title</th>
-                                <th class="px-4 py-3 text-left">Subject</th>
-                                <th class="px-4 py-3 text-left">Status</th>
-                                <th class="px-4 py-3 text-left">Duration</th>
-                                <th class="px-4 py-3 text-left">Sessions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr v-if="recentExams.length === 0">
-                                <td colspan="5" class="px-4 py-6 text-center text-gray-400">No exams yet.</td>
-                            </tr>
-                            <tr v-for="exam in recentExams" :key="exam.id" class="hover:bg-gray-50">
-                                <td class="px-4 py-3">
-                                    <Link :href="route('lecturer.exams.show', exam.id)" class="font-medium hover:underline">{{ exam.title }}</Link>
-                                </td>
-                                <td class="px-4 py-3 text-gray-500">{{ exam.subject }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="px-2 py-0.5 rounded text-xs font-semibold uppercase" :class="statusClass(exam.status)">{{ exam.status }}</span>
-                                </td>
-                                <td class="px-4 py-3 text-gray-600">{{ exam.time_limit }}min</td>
-                                <td class="px-4 py-3 text-gray-600">{{ exam.sessions_count }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <h1 class="font-display text-2xl font-medium tracking-tight text-ink">Overview</h1>
+                <p class="mt-0.5 text-xs text-ink-mute">Welcome back, {{ $page.props.auth.user.name?.split(' ')[0] }}.</p>
+            </div>
+            <div class="flex gap-2">
+                <Link
+                    :href="route('lecturer.exams.index')"
+                    class="inline-flex items-center justify-center border border-rule bg-transparent px-4 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-soft transition hover:border-ink hover:text-ink"
+                >
+                    All exams
+                </Link>
+                <Link
+                    :href="route('lecturer.exams.create')"
+                    class="inline-flex items-center justify-center bg-ink px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-ivory transition hover:bg-oxblood"
+                >
+                    + New exam
+                </Link>
+            </div>
+        </div>
+
+        <div class="px-5 py-6 sm:px-9 sm:py-8 space-y-8">
+
+            <!-- Pending reviews -->
+            <div
+                v-if="pendingReviews > 0"
+                class="flex items-center gap-3 border border-amber-300/60 bg-amber-50/70 px-4 py-3 text-sm text-amber-900"
+            >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                <span>{{ pendingReviews }} session{{ pendingReviews === 1 ? '' : 's' }} awaiting open-text review.</span>
             </div>
 
-            <!-- classes -->
-            <div>
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="font-semibold text-gray-700">Classes</h3>
-                    <Link :href="route('lecturer.classes.index')" class="text-sm text-gray-500 hover:text-gray-700">Manage →</Link>
+            <!-- Stats -->
+            <section class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div
+                    v-for="(item, i) in [
+                        { label: 'Active Exams', value: stats.active_exams, sub: 'Currently running', accent: true },
+                        { label: 'Total Exams',  value: stats.total_exams,  sub: 'All time' },
+                        { label: 'Classes',      value: stats.classes,      sub: 'Active groups' },
+                        { label: 'Students',     value: stats.students,     sub: 'Across all classes' },
+                    ]"
+                    :key="i"
+                    class="border border-rule bg-white px-5 py-5"
+                >
+                    <p class="mb-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-mute">{{ item.label }}</p>
+                    <p
+                        class="text-3xl font-bold leading-none sm:text-4xl"
+                        :class="item.accent ? 'text-oxblood' : 'text-ink'"
+                    >{{ item.value }}</p>
+                    <p class="mt-2 text-xs text-ink-mute">{{ item.sub }}</p>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div v-if="classes.length === 0" class="col-span-4 text-sm text-gray-400">
-                        No classes yet. <Link :href="route('lecturer.classes.create')" class="underline">Create one</Link>.
+            </section>
+
+            <!-- Recent exams -->
+            <section>
+                <header class="mb-3.5 flex items-center justify-between">
+                    <h2 class="text-[13px] font-bold uppercase tracking-[0.06em] text-ink">Recent Exams</h2>
+                    <Link :href="route('lecturer.exams.index')" class="text-[11px] font-semibold tracking-wide text-ink-mute transition hover:text-ink">
+                        View all →
+                    </Link>
+                </header>
+                <div class="border border-rule bg-white">
+                    <Link
+                        v-for="(ex, i) in recentExams"
+                        :key="ex.id"
+                        :href="route('lecturer.exams.show', ex.id)"
+                        class="flex items-center gap-4 px-5 py-3.5 transition hover:bg-ivory/60"
+                        :class="i < recentExams.length - 1 ? 'border-b border-rule' : ''"
+                    >
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-[13px] font-semibold text-ink">{{ ex.title }}</p>
+                            <p class="truncate text-[11px] text-ink-mute">{{ ex.subject }}</p>
+                        </div>
+                        <span
+                            class="hidden flex-shrink-0 items-center gap-1.5 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] sm:inline-flex"
+                            :class="[badgeFor(ex.status).bg, badgeFor(ex.status).text]"
+                        >
+                            <span class="h-1.5 w-1.5 rounded-full" :class="badgeFor(ex.status).dot" />
+                            {{ ex.status }}
+                        </span>
+                        <span class="hidden w-16 flex-shrink-0 text-right text-xs text-ink-mute md:block">{{ ex.time_limit }}min</span>
+                        <span
+                            v-if="ex.status === 'active'"
+                            class="hidden w-20 flex-shrink-0 text-right text-xs font-semibold text-ink md:block"
+                        >{{ ex.sessions_count }} taken</span>
+                        <span v-else class="hidden w-20 md:block" />
+                    </Link>
+                    <div v-if="recentExams.length === 0" class="px-5 py-12 text-center text-sm text-ink-mute">
+                        No exams yet.
+                        <Link :href="route('lecturer.exams.create')" class="ml-1 underline underline-offset-2 hover:text-ink">Create one</Link>
                     </div>
-                    <div v-for="c in classes" :key="c.id" class="bg-white border rounded-lg p-4">
-                        <p class="font-semibold text-gray-800">{{ c.name }}</p>
-                        <p class="text-xs text-gray-400 mt-0.5">{{ c.students }} students</p>
-                        <div class="mt-2 flex flex-wrap gap-1">
-                            <span v-for="s in c.subjects" :key="s" class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{{ s }}</span>
+                </div>
+            </section>
+
+            <!-- Classes -->
+            <section>
+                <header class="mb-3.5 flex items-center justify-between">
+                    <h2 class="text-[13px] font-bold uppercase tracking-[0.06em] text-ink">Classes</h2>
+                    <Link :href="route('lecturer.classes.index')" class="text-[11px] font-semibold tracking-wide text-ink-mute transition hover:text-ink">
+                        Manage →
+                    </Link>
+                </header>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div
+                        v-for="cl in classes"
+                        :key="cl.id"
+                        class="border border-rule bg-white px-5 py-4"
+                    >
+                        <p class="text-[14px] font-bold text-ink">{{ cl.name }}</p>
+                        <p class="mt-1 text-[11px] text-ink-mute">{{ cl.students }} student{{ cl.students === 1 ? '' : 's' }}</p>
+                        <div class="mt-3 flex flex-wrap gap-1">
+                            <span
+                                v-for="s in cl.subjects"
+                                :key="s"
+                                class="bg-ivory-200 px-2 py-0.5 text-[10px] font-medium text-ink-soft"
+                            >{{ s }}</span>
+                            <span v-if="!cl.subjects?.length" class="text-[10px] italic text-ink-mute">No subjects</span>
                         </div>
                     </div>
+                    <div
+                        v-if="classes.length === 0"
+                        class="col-span-full border border-dashed border-rule px-6 py-10 text-center text-sm text-ink-mute"
+                    >
+                        No classes yet.
+                        <Link :href="route('lecturer.classes.create')" class="underline underline-offset-2 hover:text-ink">Create one</Link>.
+                    </div>
                 </div>
-            </div>
-
+            </section>
         </div>
+
     </AuthenticatedLayout>
 </template>
