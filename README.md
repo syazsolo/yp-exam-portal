@@ -132,6 +132,15 @@ composer pint             # format PHP
 
 ---
 
+## ✨ Scope Covered
+
+Beyond the brief, the project also includes:
+
+- **Setup diagnostics** — friendly diagnosis pages for common boot-time issues (DB offline, missing migrations, unset `APP_KEY`, unbuilt Vite assets, etc.) so misconfiguration is obvious at a glance.
+- **Laravel IDE Helper**
+
+---
+
 ## 📌 Status
 
 🚧 **Work in progress.** Currently scaffolded with Laravel 11 + Breeze (Vue + Inertia). Role-based auth (Lecturer / Student) landed. Exam/class/subject features land iteratively over the 4-day window.
