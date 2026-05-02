@@ -18,7 +18,7 @@ A portal for lecturers to manage & assign exams, which students take.
 
 Build a portal for online examination + student management with:
 
-- **Roles** — Lecturer & Student
+- **Roles** — Admin, Lecturer & Student
 - **Authentication** — secure login per user
 - **Exam Creation** — multiple-choice + open-text questions
 - **Class Management** — students grouped into classes
@@ -137,6 +137,7 @@ composer pint             # format PHP
 Beyond the brief, the project also includes:
 
 - **Setup diagnostics** — friendly diagnosis pages for common boot-time issues (DB offline, missing migrations, unset `APP_KEY`, unbuilt Vite assets, etc.) so misconfiguration is obvious at a glance.
+- **Admin role** — Admin accounts are not public registration accounts. Run `php artisan admin:create` to create one from the command line.
 - **Laravel IDE Helper**
 
 ---
