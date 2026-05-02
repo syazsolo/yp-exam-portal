@@ -13,7 +13,7 @@ class ReviewController extends Controller
 {
     public function show(ExamSession $session)
     {
-        abort_unless($session->exam->created_by === Auth::id()(), 403);
+        abort_unless($session->exam->created_by === Auth::id(), 403);
         $session->load(['exam.questions.options', 'answers.question', 'answers.selectedOption', 'student']);
 
         return Inertia::render('Lecturer/Review/Show', [
@@ -64,7 +64,7 @@ class ReviewController extends Controller
 
     public function finalize(ExamSession $session)
     {
-        abort_unless($session->exam->created_by === Auth::id()(), 403);
+        abort_unless($session->exam->created_by === Auth::id(), 403);
         abort_unless($session->allOpenTextReviewed(), 422);
 
         $session->markAllReviewed();

@@ -57,7 +57,7 @@ class QuestionController extends Controller
 
     public function edit(Question $question)
     {
-        abort_unless($question->exam->created_by === Auth::id()(), 403);
+        abort_unless($question->exam->created_by === Auth::id(), 403);
         $question->load('options');
 
         return Inertia::render('Lecturer/Questions/Edit', [
@@ -78,7 +78,7 @@ class QuestionController extends Controller
 
     public function update(Request $request, Question $question)
     {
-        abort_unless($question->exam->created_by === Auth::id()(), 403);
+        abort_unless($question->exam->created_by === Auth::id(), 403);
 
         $data = $request->validate([
             'text' => 'required|string',
@@ -106,7 +106,7 @@ class QuestionController extends Controller
 
     public function destroy(Question $question)
     {
-        abort_unless($question->exam->created_by === Auth::id()(), 403);
+        abort_unless($question->exam->created_by === Auth::id(), 403);
         $examId = $question->exam_id;
         $question->delete();
 

@@ -104,7 +104,7 @@ class ExamSessionController extends Controller
     /** GET /student/exam-sessions/{session} — view a past session */
     public function showSession(ExamSession $session)
     {
-        abort_unless($session->user_id === Auth::id()(), 403);
+        abort_unless($session->user_id === Auth::id(), 403);
 
         $session->load(['exam.questions.options', 'answers.question', 'answers.selectedOption']);
 
@@ -132,7 +132,7 @@ class ExamSessionController extends Controller
     /** POST /student/exam-sessions/{session}/submit */
     public function submit(ExamSession $session)
     {
-        abort_unless($session->user_id === Auth::id()(), 403);
+        abort_unless($session->user_id === Auth::id(), 403);
         abort_unless($session->state instanceof Pending, 403, 'Session already submitted.');
 
         $session->submit();
@@ -143,7 +143,7 @@ class ExamSessionController extends Controller
     /** POST /student/exam-sessions/{session}/answers */
     public function saveAnswer(Request $request, ExamSession $session)
     {
-        abort_unless($session->user_id === Auth::id()(), 403);
+        abort_unless($session->user_id === Auth::id(), 403);
         abort_unless($session->state instanceof Pending, 403);
 
         $data = $request->validate([

@@ -56,7 +56,7 @@ class ClassController extends Controller
     {
         $this->authorizeClass($class);
         $class->load(['subjects', 'students']);
-        $subjects = Subject::where('created_by', Auth::id()())->orderBy('name')->get(['id', 'name']);
+        $subjects = Subject::where('created_by', Auth::id())->orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('Lecturer/Classes/Show', [
             'schoolClass' => [
@@ -73,7 +73,7 @@ class ClassController extends Controller
     {
         $this->authorizeClass($class);
         $class->load('subjects');
-        $subjects = Subject::where('created_by', Auth::id()())->orderBy('name')->get(['id', 'name']);
+        $subjects = Subject::where('created_by', Auth::id())->orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('Lecturer/Classes/Edit', [
             'class' => [
@@ -133,6 +133,6 @@ class ClassController extends Controller
 
     private function authorizeClass(SchoolClass $class): void
     {
-        abort_unless($class->created_by === Auth::id()(), 403);
+        abort_unless($class->created_by === Auth::id(), 403);
     }
 }

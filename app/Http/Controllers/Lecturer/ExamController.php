@@ -108,7 +108,7 @@ class ExamController extends Controller
         $this->authorizeExam($exam);
         abort_if($exam->status === 'active', 403, 'Cannot edit an active exam.');
 
-        $subjects = Subject::where('created_by', Auth::id()())->orderBy('name')->get(['id', 'name']);
+        $subjects = Subject::where('created_by', Auth::id())->orderBy('name')->get(['id', 'name']);
 
         return Inertia::render('Lecturer/Exams/Edit', [
             'exam' => [
@@ -154,6 +154,6 @@ class ExamController extends Controller
 
     private function authorizeExam(Exam $exam): void
     {
-        abort_unless($exam->created_by === Auth::id()(), 403);
+        abort_unless($exam->created_by === Auth::id(), 403);
     }
 }
