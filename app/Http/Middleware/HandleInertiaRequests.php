@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Navigation\AppNavigation;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -32,6 +33,11 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => ['user' => $request->user()],
+            'app' => [
+                'nav' => fn () => $request->user()
+                    ? app(AppNavigation::class)->for($request->user())
+                    : [],
+            ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

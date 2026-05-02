@@ -22,10 +22,8 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-// Generic dashboard — auth landing. Renders shared Dashboard component;
-// frontend can branch on auth.user.role.
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return redirect()->route(Auth::user()->dashboardRoute());
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Admin routes
