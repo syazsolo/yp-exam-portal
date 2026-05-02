@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\GeneratesStringId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,11 +12,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subject extends Model
 {
-    use HasFactory, SoftDeletes;
+    use GeneratesStringId, HasFactory, SoftDeletes;
 
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    protected static string $stringIdPrefix = 'SUB';
 
     protected $fillable = ['id', 'name', 'description', 'created_by'];
 

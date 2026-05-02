@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\Auditable;
+use App\Models\Concerns\GeneratesStringId;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,13 +12,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SchoolClass extends Model
 {
-    use Auditable, HasFactory, SoftDeletes;
+    use Auditable, GeneratesStringId, HasFactory, SoftDeletes;
 
     protected $table = 'school_classes';
 
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    protected static string $stringIdPrefix = 'CLS';
 
     protected $fillable = ['id', 'name', 'created_by'];
 
