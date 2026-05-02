@@ -5,15 +5,16 @@ import { Head, router, Link } from '@inertiajs/vue3'
 defineProps({ availableExams: Array, mySessions: Array })
 
 const statusCls = (s) => ({
-    in_progress:  'bg-yellow-100 text-yellow-800',
+    pending:      'bg-yellow-100 text-yellow-800',
     submitted:    'bg-blue-100 text-blue-800',
-    under_review: 'bg-orange-100 text-orange-800',
-    graded:       'bg-green-100 text-green-800',
+    pending_review: 'bg-orange-100 text-orange-800',
+    scored:       'bg-green-100 text-green-800',
+    invalid:      'bg-red-100 text-red-800',
 }[s] ?? 'bg-gray-100 text-gray-600')
 
 function start(examId) {
     if (confirm('Start this exam? The timer will begin immediately.')) {
-        router.post(route('student.exams.start', examId))
+        router.post(route('student.exams.sessions.start', examId))
     }
 }
 </script>
@@ -61,12 +62,12 @@ function start(examId) {
                                 <td class="px-4 py-3 font-medium">{{ s.exam_title }}</td>
                                 <td class="px-4 py-3 text-gray-500">{{ s.subject }}</td>
                                 <td class="px-4 py-3">
-                                    <span class="px-2 py-0.5 rounded text-xs font-semibold uppercase" :class="statusCls(s.status)">{{ s.status.replace('_', ' ') }}</span>
+                                    <span class="px-2 py-0.5 rounded text-xs font-semibold uppercase" :class="statusCls(s.state)">{{ s.state.replace('_', ' ') }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-gray-600">{{ s.score_label }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    <Link v-if="s.status === 'in_progress'" :href="route('student.sessions.show', s.id)" class="text-xs text-blue-600 hover:underline">Continue</Link>
-                                    <Link v-else :href="route('student.sessions.result', s.id)" class="text-xs text-gray-500 hover:underline">View</Link>
+                                    <Link v-if="s.state === 'pending'" :href="route('student.exam-sessions.show', s.id)" class="text-xs text-blue-600 hover:underline">Continue</Link>
+                                    <Link v-else :href="route('student.exam-sessions.show', s.id)" class="text-xs text-gray-500 hover:underline">View</Link>
                                 </td>
                             </tr>
                         </tbody>

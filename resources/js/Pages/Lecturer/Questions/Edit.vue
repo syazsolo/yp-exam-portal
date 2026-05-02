@@ -4,15 +4,20 @@ import { Head, useForm, Link } from '@inertiajs/vue3'
 
 const props = defineProps({ question: Object })
 const form  = useForm({
-    body:           props.question.body,
-    points:         props.question.points,
-    options:        props.question.options.map(o => ({ body: o.body })),
+    text:           props.question.text,
+    weight:         props.question.weight,
+    options:        props.question.options.map(o => ({ text: o.body, is_correct: o.is_correct })),
     correct_option: props.question.options.findIndex(o => o.is_correct),
 })
 
-function addOption()     { form.options.push({ body: '' }) }
+function addOption()     { form.options.push({ text: '', is_correct: false }) }
 function removeOption(i) { if (form.options.length > 2) form.options.splice(i, 1) }
-function submit()        { form.patch(route('lecturer.questions.update', props.question.id)) }
+function submit() {
+    form.options.forEach((option, index) => {
+        option.is_correct = index === form.correct_option
+    })
+    form.patch(route('lecturer.questions.update', props.question.id))
+}
 </script>
 
 <template>
@@ -30,12 +35,12 @@ function submit()        { form.patch(route('lecturer.questions.update', props.q
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
-                    <textarea v-model="form.body" rows="3" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                    <textarea v-model="form.text" rows="3" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Points</label>
-                    <input v-model="form.points" type="number" min="1" class="w-32 border rounded px-3 py-2 text-sm" />
+                    <input v-model="form.weight" type="number" min="1" class="w-32 border rounded px-3 py-2 text-sm" />
                 </div>
 
                 <div v-if="question.type === 'mcq'">
@@ -43,7 +48,7 @@ function submit()        { form.patch(route('lecturer.questions.update', props.q
                     <div class="space-y-2">
                         <div v-for="(opt, i) in form.options" :key="i" class="flex items-center gap-2">
                             <input type="radio" :value="i" v-model="form.correct_option" />
-                            <input v-model="opt.body" type="text" :placeholder="`Option ${i+1}`"
+                            <input v-model="opt.text" type="text" :placeholder="`Option ${i+1}`"
                                 class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
                             <button v-if="form.options.length > 2" @click="removeOption(i)" class="text-red-400 text-xs">✕</button>
                         </div>

@@ -43,10 +43,12 @@ Route::middleware(['auth', 'verified', 'lecturer'])->prefix('lecturer')->name('l
     Route::delete('classes/{class}/students/{user}', [ClassController::class, 'removeStudent'])->name('classes.students.remove');
 
     // Exams — nested under subject for creation, standalone for management
+    Route::post('exams', [ExamController::class, 'store'])->name('exams.store');
     Route::post('subjects/{subject}/exams', [ExamController::class, 'store'])->name('subjects.exams.store');
     Route::resource('exams', ExamController::class)->except('store');
 
     // Questions nested under exam
+    Route::get('exams/{exam}/questions/create', [QuestionController::class, 'create'])->name('exams.questions.create');
     Route::post('exams/{exam}/questions', [QuestionController::class, 'store'])->name('exams.questions.store');
     Route::resource('questions', QuestionController::class)->except('store', 'index', 'create');
 

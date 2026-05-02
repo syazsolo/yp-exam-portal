@@ -6,7 +6,7 @@ const props = defineProps({ session: Object })
 
 function gradeForm(answer) {
     return useForm({
-        points_awarded:   answer.points_awarded ?? 0,
+        score:            answer.score ?? 0,
         reviewer_comment: answer.reviewer_comment ?? '',
     })
 }
@@ -16,7 +16,7 @@ const forms = props.session.answers
     .reduce((acc, a) => { acc[a.id] = gradeForm(a); return acc }, {})
 
 function submitGrade(answerId) {
-    forms[answerId].patch(route('lecturer.sessions.answers.grade', [props.session.id, answerId]))
+    forms[answerId].patch(route('lecturer.answers.score', answerId))
 }
 
 function finalize() {
@@ -42,9 +42,9 @@ function finalize() {
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-semibold text-gray-400">Q{{ i + 1 }}</span>
                     <span class="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase">{{ answer.type === 'mcq' ? 'MCQ' : 'Open Text' }}</span>
-                    <span class="text-xs text-gray-400">max {{ answer.question.points }} pts</span>
+                    <span class="text-xs text-gray-400">max {{ answer.question.weight }} pts</span>
                 </div>
-                <p class="text-sm font-medium text-gray-800">{{ answer.question.body }}</p>
+                <p class="text-sm font-medium text-gray-800">{{ answer.question.text }}</p>
 
                 <!-- MCQ -->
                 <div v-if="answer.type === 'mcq'">
@@ -52,7 +52,7 @@ function finalize() {
                         Answer: <span :class="answer.selected_option?.is_correct ? 'text-green-700 font-medium' : 'text-red-600 font-medium'">
                             {{ answer.selected_option?.body ?? '(no answer)' }}
                         </span>
-                        <span class="ml-2 text-xs text-gray-400">{{ answer.points_awarded }} / {{ answer.question.points }} pts</span>
+                        <span class="ml-2 text-xs text-gray-400">{{ answer.score }} / {{ answer.question.weight }} pts</span>
                     </p>
                 </div>
 
@@ -63,10 +63,10 @@ function finalize() {
                     <div class="space-y-2">
                         <div class="flex items-center gap-3">
                             <label class="text-xs font-medium text-gray-600 w-24">Points Awarded</label>
-                            <input v-model="forms[answer.id].points_awarded" type="number"
-                                :min="0" :max="answer.question.points"
+                            <input v-model="forms[answer.id].score" type="number"
+                                :min="0" :max="answer.question.weight"
                                 class="w-20 border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
-                            <span class="text-xs text-gray-400">/ {{ answer.question.points }}</span>
+                            <span class="text-xs text-gray-400">/ {{ answer.question.weight }}</span>
                         </div>
                         <div>
                             <label class="text-xs font-medium text-gray-600">Comment <span class="font-normal text-gray-400">(optional)</span></label>
@@ -75,7 +75,7 @@ function finalize() {
                         </div>
                         <button @click="submitGrade(answer.id)" :disabled="forms[answer.id].processing"
                             class="bg-gray-800 text-white text-xs px-3 py-1.5 rounded hover:bg-gray-700 disabled:opacity-50">
-                            {{ answer.points_awarded !== null ? 'Update Grade' : 'Save Grade' }}
+                            {{ answer.score !== null ? 'Update Grade' : 'Save Grade' }}
                         </button>
                     </div>
                 </div>

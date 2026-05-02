@@ -8,10 +8,11 @@ const statusCls = (s) => ({
     active:       'bg-green-100 text-green-800',
     closed:       'bg-red-100 text-red-800',
     draft:        'bg-gray-100 text-gray-600',
-    in_progress:  'bg-yellow-100 text-yellow-800',
+    pending:      'bg-yellow-100 text-yellow-800',
     submitted:    'bg-blue-100 text-blue-800',
-    under_review: 'bg-orange-100 text-orange-800',
-    graded:       'bg-green-100 text-green-800',
+    pending_review: 'bg-orange-100 text-orange-800',
+    scored:       'bg-green-100 text-green-800',
+    invalid:      'bg-red-100 text-red-800',
 }[s] ?? 'bg-gray-100 text-gray-600')
 
 function destroyQuestion(qid) {
@@ -58,9 +59,9 @@ function destroyQuestion(qid) {
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="text-xs font-semibold text-gray-400">Q{{ i + 1 }}</span>
                                     <span class="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded uppercase">{{ q.type === 'mcq' ? 'MCQ' : 'Open Text' }}</span>
-                                    <span class="text-xs text-gray-400">{{ q.points }} pt{{ q.points !== 1 ? 's' : '' }}</span>
+                                    <span class="text-xs text-gray-400">{{ q.weight }} pt{{ q.weight !== 1 ? 's' : '' }}</span>
                                 </div>
-                                <p class="text-sm text-gray-800">{{ q.body }}</p>
+                                <p class="text-sm text-gray-800">{{ q.text }}</p>
                                 <ul v-if="q.type === 'mcq'" class="mt-2 space-y-1">
                                     <li v-for="o in q.options" :key="o.id" class="text-xs flex items-center gap-1.5"
                                         :class="o.is_correct ? 'text-green-700 font-medium' : 'text-gray-500'">
@@ -95,11 +96,11 @@ function destroyQuestion(qid) {
                             <tr v-if="sessions.length === 0"><td colspan="5" class="px-4 py-6 text-center text-gray-400">No sessions yet.</td></tr>
                             <tr v-for="s in sessions" :key="s.id" class="hover:bg-gray-50">
                                 <td class="px-4 py-3 font-medium">{{ s.student }}</td>
-                                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold uppercase" :class="statusCls(s.status)">{{ s.status.replace('_', ' ') }}</span></td>
+                                <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-xs font-semibold uppercase" :class="statusCls(s.state)">{{ s.state.replace('_', ' ') }}</span></td>
                                 <td class="px-4 py-3 text-gray-600">{{ s.score_label }}</td>
                                 <td class="px-4 py-3 text-gray-500 text-xs">{{ s.submitted_at ? new Date(s.submitted_at).toLocaleString() : '—' }}</td>
                                 <td class="px-4 py-3 text-right">
-                                    <Link v-if="s.status === 'under_review'" :href="route('lecturer.sessions.review', s.id)" class="text-xs text-blue-600 hover:underline">Review</Link>
+                                    <Link v-if="s.state === 'pending_review'" :href="route('lecturer.sessions.review', s.id)" class="text-xs text-blue-600 hover:underline">Review</Link>
                                 </td>
                             </tr>
                         </tbody>

@@ -6,7 +6,7 @@ const props  = defineProps({ exam: Object, subjects: Array })
 const form   = useForm({
     title:           props.exam.title,
     subject_id:      props.exam.subject_id,
-    time_limit_mins: props.exam.time_limit_mins,
+    time_limit_minutes: props.exam.time_limit_minutes,
     starts_at:       props.exam.starts_at ? props.exam.starts_at.slice(0,16) : '',
     ends_at:         props.exam.ends_at   ? props.exam.ends_at.slice(0,16)   : '',
 })
@@ -31,7 +31,7 @@ const submit = () => form.patch(route('lecturer.exams.update', props.exam.id))
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Time Limit (minutes)</label>
-                    <input v-model="form.time_limit_mins" type="number" min="1" class="w-full border rounded px-3 py-2 text-sm" />
+                    <input v-model="form.time_limit_minutes" type="number" min="1" class="w-full border rounded px-3 py-2 text-sm" />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>

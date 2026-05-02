@@ -1,20 +1,24 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, useForm, Link } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
 
 const props = defineProps({ exam: Object })
 const form  = useForm({
     type:           'mcq',
-    body:           '',
-    points:         1,
-    options:        [{ body: '' }, { body: '' }, { body: '' }, { body: '' }],
+    text:           '',
+    weight:         1,
+    options:        [{ text: '', is_correct: true }, { text: '', is_correct: false }, { text: '', is_correct: false }, { text: '', is_correct: false }],
     correct_option: 0,
 })
 
-function addOption()    { form.options.push({ body: '' }) }
+function addOption()    { form.options.push({ text: '', is_correct: false }) }
 function removeOption(i){ if (form.options.length > 2) form.options.splice(i, 1) }
-function submit()       { form.post(route('lecturer.exams.questions.store', props.exam.id)) }
+function submit() {
+    form.options.forEach((option, index) => {
+        option.is_correct = index === form.correct_option
+    })
+    form.post(route('lecturer.exams.questions.store', props.exam.id))
+}
 </script>
 
 <template>
@@ -45,14 +49,14 @@ function submit()       { form.post(route('lecturer.exams.questions.store', prop
                 <!-- body -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
-                    <textarea v-model="form.body" rows="3" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
-                    <p v-if="form.errors.body" class="text-red-600 text-xs mt-1">{{ form.errors.body }}</p>
+                    <textarea v-model="form.text" rows="3" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                    <p v-if="form.errors.text" class="text-red-600 text-xs mt-1">{{ form.errors.text }}</p>
                 </div>
 
                 <!-- points -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Points</label>
-                    <input v-model="form.points" type="number" min="1" class="w-32 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                    <input v-model="form.weight" type="number" min="1" class="w-32 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
                 </div>
 
                 <!-- mcq options -->
@@ -61,7 +65,7 @@ function submit()       { form.post(route('lecturer.exams.questions.store', prop
                     <div class="space-y-2">
                         <div v-for="(opt, i) in form.options" :key="i" class="flex items-center gap-2">
                             <input type="radio" :value="i" v-model="form.correct_option" />
-                            <input v-model="opt.body" type="text" :placeholder="`Option ${i+1}`"
+                            <input v-model="opt.text" type="text" :placeholder="`Option ${i+1}`"
                                 class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
                             <button v-if="form.options.length > 2" @click="removeOption(i)" class="text-red-400 text-xs hover:text-red-600">✕</button>
                         </div>

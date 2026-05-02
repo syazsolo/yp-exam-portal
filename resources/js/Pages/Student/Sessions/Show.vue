@@ -15,7 +15,7 @@ onMounted(() => {
         remaining.value = Math.max(0, Math.floor((deadline - Date.now()) / 1000))
         if (remaining.value === 0) {
             clearInterval(timer)
-            router.post(route('student.sessions.submit', props.session.id))
+            router.post(route('student.exam-sessions.submit', props.session.id))
         }
     }
     tick()
@@ -40,12 +40,12 @@ function saveAnswer(question) {
     } else {
         payload.text_answer = answers.value[question.id]?.text_answer ?? ''
     }
-    router.post(route('student.sessions.answers.save', props.session.id), payload, { preserveScroll: true })
+    router.post(route('student.exam-sessions.answers.save', props.session.id), payload, { preserveScroll: true })
 }
 
 function submit() {
     if (confirm('Submit exam? You cannot change answers after this.')) {
-        router.post(route('student.sessions.submit', props.session.id))
+        router.post(route('student.exam-sessions.submit', props.session.id))
     }
 }
 

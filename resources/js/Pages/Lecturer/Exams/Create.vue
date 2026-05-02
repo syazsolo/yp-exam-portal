@@ -3,7 +3,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { Head, useForm, Link } from '@inertiajs/vue3'
 
 const props  = defineProps({ subjects: Array })
-const form   = useForm({ title: '', subject_id: '', time_limit_mins: 30, starts_at: '', ends_at: '' })
+const form   = useForm({ title: '', subject_id: '', time_limit_minutes: 30, starts_at: '', ends_at: '' })
 const submit = () => form.post(route('lecturer.exams.store'))
 </script>
 
@@ -28,7 +28,7 @@ const submit = () => form.post(route('lecturer.exams.store'))
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Time Limit (minutes)</label>
-                    <input v-model="form.time_limit_mins" type="number" min="1" max="300" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
+                    <input v-model="form.time_limit_minutes" type="number" min="1" max="300" class="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400" />
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>

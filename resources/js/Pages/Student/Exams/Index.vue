@@ -6,7 +6,7 @@ defineProps({ exams: Array })
 
 function start(examId) {
     if (confirm('Start this exam? The timer will begin immediately.')) {
-        router.post(route('student.exams.start', examId))
+        router.post(route('student.exams.sessions.start', examId))
     }
 }
 </script>

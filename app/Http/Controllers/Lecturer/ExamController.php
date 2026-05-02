@@ -39,11 +39,12 @@ class ExamController extends Controller
         return Inertia::render('Lecturer/Exams/Create', compact('subjects'));
     }
 
-    /** Handles POST /lecturer/subjects/{subject}/exams */
-    public function store(Request $request, Subject $subject)
+    /** Handles POST /lecturer/exams and POST /lecturer/subjects/{subject}/exams */
+    public function store(Request $request, ?Subject $subject = null)
     {
         $data = $request->validate([
             'title' => 'required|string|max:255',
+            'subject_id' => [$subject ? 'nullable' : 'required', 'exists:subjects,id'],
             'time_limit_minutes' => 'required|integer|min:1|max:300',
             'default_question_weight' => 'nullable|numeric|min:0.01',
             'starts_at' => 'required|date',
@@ -52,7 +53,7 @@ class ExamController extends Controller
 
         $exam = Exam::create([
             ...$data,
-            'subject_id' => $subject->id,
+            'subject_id' => $subject?->id ?? $data['subject_id'],
             'created_by' => $request->user()->id,
             'default_question_weight' => $data['default_question_weight'] ?? 1.0,
             'status' => 'draft',

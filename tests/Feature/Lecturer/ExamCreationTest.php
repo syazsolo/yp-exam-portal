@@ -4,9 +4,11 @@ namespace Tests\Feature\Lecturer;
 
 use App\Models\Answer;
 use App\Models\Exam;
+use App\Models\ExamSession;
 use App\Models\Question;
 use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class ExamCreationTest extends TestCase
@@ -81,10 +83,33 @@ class ExamCreationTest extends TestCase
 
     // --- MCQ questions ---
 
+    public function test_lecturer_exam_show_exposes_session_state_for_frontend(): void
+    {
+        $lecturer = $this->createLecturer();
+        $student = $this->createStudent();
+        $exam = Exam::factory()->create(['created_by' => $lecturer->id]);
+
+        ExamSession::factory()->create([
+            'exam_id' => $exam->id,
+            'user_id' => $student->id,
+            'state' => 'pending_review',
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($lecturer)->get("/lecturer/exams/{$exam->id}");
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Lecturer/Exams/Show')
+            ->where('sessions.0.state', 'pending_review')
+            ->missing('sessions.0.status')
+        );
+    }
+
     public function test_lecturer_can_add_mcq_question_to_exam(): void
     {
         $lecturer = $this->createLecturer();
-        $exam = Exam::factory()->create();
+        $exam = Exam::factory()->create(['created_by' => $lecturer->id]);
 
         $response = $this->actingAs($lecturer)
             ->post("/lecturer/exams/{$exam->id}/questions", [
@@ -109,7 +134,7 @@ class ExamCreationTest extends TestCase
     public function test_mcq_question_requires_at_least_two_options(): void
     {
         $lecturer = $this->createLecturer();
-        $exam = Exam::factory()->create();
+        $exam = Exam::factory()->create(['created_by' => $lecturer->id]);
 
         $response = $this->actingAs($lecturer)
             ->post("/lecturer/exams/{$exam->id}/questions", [
@@ -126,7 +151,7 @@ class ExamCreationTest extends TestCase
     public function test_mcq_question_requires_exactly_one_correct_option(): void
     {
         $lecturer = $this->createLecturer();
-        $exam = Exam::factory()->create();
+        $exam = Exam::factory()->create(['created_by' => $lecturer->id]);
 
         $response = $this->actingAs($lecturer)
             ->post("/lecturer/exams/{$exam->id}/questions", [
@@ -147,7 +172,7 @@ class ExamCreationTest extends TestCase
     public function test_lecturer_can_add_open_text_question_to_exam(): void
     {
         $lecturer = $this->createLecturer();
-        $exam = Exam::factory()->create();
+        $exam = Exam::factory()->create(['created_by' => $lecturer->id]);
 
         $response = $this->actingAs($lecturer)
             ->post("/lecturer/exams/{$exam->id}/questions", [

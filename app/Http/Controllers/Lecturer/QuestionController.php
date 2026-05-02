@@ -11,8 +11,22 @@ use Inertia\Inertia;
 
 class QuestionController extends Controller
 {
+    public function create(Exam $exam)
+    {
+        abort_unless($exam->created_by === Auth::id(), 403);
+
+        return Inertia::render('Lecturer/Questions/Create', [
+            'exam' => [
+                'id' => $exam->id,
+                'title' => $exam->title,
+            ],
+        ]);
+    }
+
     public function store(Request $request, Exam $exam)
     {
+        abort_unless($exam->created_by === Auth::id(), 403);
+
         $data = $request->validate([
             'type' => 'required|in:mcq,open_text',
             'text' => 'required|string',

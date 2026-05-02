@@ -5,8 +5,8 @@ import { Head, Link } from '@inertiajs/vue3'
 defineProps({ session: Object })
 
 const statusCls = (s) => ({
-    under_review: 'bg-orange-100 text-orange-800',
-    graded:       'bg-green-100 text-green-800',
+    pending_review: 'bg-orange-100 text-orange-800',
+    scored:       'bg-green-100 text-green-800',
     submitted:    'bg-blue-100 text-blue-800',
 }[s] ?? 'bg-gray-100 text-gray-600')
 </script>
@@ -23,13 +23,13 @@ const statusCls = (s) => ({
                     <p class="text-xs text-gray-400 uppercase tracking-wide">Status</p>
                     <span class="mt-1 inline-block px-2 py-0.5 rounded text-sm font-semibold uppercase" :class="statusCls(session.status)">{{ session.status.replace('_', ' ') }}</span>
                 </div>
-                <div v-if="session.status === 'graded'">
+                <div v-if="session.status === 'scored'">
                     <p class="text-xs text-gray-400 uppercase tracking-wide">Score</p>
                     <p class="text-3xl font-bold text-gray-900 mt-1">{{ session.score_label }}</p>
                     <p class="text-sm text-gray-500">{{ session.score_pct }}%</p>
                 </div>
                 <div v-else class="text-sm text-gray-500">
-                    <span v-if="session.status === 'under_review'">Your open-text answers are being reviewed by the lecturer.</span>
+                    <span v-if="session.status === 'pending_review'">Your open-text answers are being reviewed by the lecturer.</span>
                     <span v-else>Score will be available after grading.</span>
                 </div>
             </div>
