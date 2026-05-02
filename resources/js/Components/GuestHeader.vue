@@ -1,6 +1,6 @@
 <script setup>
 /**
- * SiteHeader
+ * GuestHeader
  * ──────────
  * Marketing/landing header. Guests only — authed users are
  * redirected away from this page server-side.

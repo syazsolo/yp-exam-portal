@@ -1,6 +1,6 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import SiteHeader from '@/Components/SiteHeader.vue';
+import GuestHeader from '@/Components/GuestHeader.vue';
 </script>
 
 <template>
@@ -27,7 +27,7 @@ import SiteHeader from '@/Components/SiteHeader.vue';
         />
 
         <!-- ── Header ─────────────────────────────────────────── -->
-        <SiteHeader />
+        <GuestHeader />
 
         <!-- ── Hero ───────────────────────────────────────────── -->
         <main

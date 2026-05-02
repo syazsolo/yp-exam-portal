@@ -1,5 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import BrandLogo from '@/Components/BrandLogo.vue';
 
 defineProps({
     eyebrow: { type: String, default: 'Welcome' },
@@ -12,9 +13,8 @@ defineProps({
 
         <!-- Mobile-only mini brand bar -->
         <div class="flex items-center justify-between border-b border-rule bg-ivory px-6 py-4 lg:hidden">
-            <Link href="/" class="inline-flex items-baseline gap-2">
-                <span class="font-logo text-[20px] font-light italic leading-none tracking-tight text-ink">yp</span>
-                <span class="text-[9px] font-medium uppercase tracking-[0.2em] text-ink-mute">Examination Portal</span>
+            <Link href="/" class="inline-flex">
+                <BrandLogo />
             </Link>
             <Link
                 v-if="altLink"
@@ -31,9 +31,8 @@ defineProps({
                 style="background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 100% 60px;"
             />
 
-            <Link href="/" class="relative inline-flex items-baseline gap-2.5">
-                <span class="font-logo text-[22px] font-light italic leading-none tracking-tight text-ivory">yp</span>
-                <span class="text-[9px] font-medium uppercase tracking-[0.22em] text-ivory/40">Examination Portal</span>
+            <Link href="/" class="relative inline-flex">
+                <BrandLogo tone="ivory" />
             </Link>
 
             <div class="relative my-10 lg:my-0">
