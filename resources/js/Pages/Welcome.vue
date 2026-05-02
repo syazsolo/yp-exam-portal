@@ -1,6 +1,6 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
-import GuestHeader from '@/Components/GuestHeader.vue';
+import { Head } from "@inertiajs/vue3";
+import GuestHeader from "@/Components/GuestHeader.vue";
 </script>
 
 <template>
@@ -36,8 +36,8 @@ import GuestHeader from '@/Components/GuestHeader.vue';
             <div class="grid grid-cols-12 gap-8">
                 <div class="col-span-12 lg:col-span-10">
                     <h1
-                        class="reveal reveal-2 font-display font-light leading-[0.92] tracking-[-0.03em] text-[clamp(2.75rem,10vw,7.5rem)]"
-                        style="font-variation-settings: 'opsz' 144"
+                        class="reveal reveal-2 font-display text-[clamp(2.75rem,10vw,7.5rem)] font-light leading-[0.92] tracking-[-0.03em]"
+                        style="font-variation-settings: &quot;opsz&quot; 144"
                     >
                         Examinations,
                         <span class="italic text-oxblood">redesigned.</span>

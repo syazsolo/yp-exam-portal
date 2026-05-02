@@ -54,10 +54,12 @@
         ],
         "pint": "pint",
         "pint:test": "pint --test",
+        "format:frontend:test": "npm run format:check",
         "test": "@php artisan test",
         "build": "npm run build",
         "ci": [
             "@pint:test",
+            "@format:frontend:test",
             "@test",
             "@build"
         ]
@@ -65,9 +67,10 @@
     "scripts-descriptions": {
         "pint": "Format PHP code with Laravel Pint.",
         "pint:test": "Check PHP formatting without applying changes.",
+        "format:frontend:test": "Check frontend formatting without applying changes.",
         "test": "Run the PHPUnit test suite via artisan.",
         "build": "Build frontend assets with Vite.",
-        "ci": "Run the full CI pipeline: format check, tests, frontend build."
+        "ci": "Run the full CI pipeline: PHP and frontend format checks, tests, frontend build."
     },
     "extra": {
         "branch-alias": {

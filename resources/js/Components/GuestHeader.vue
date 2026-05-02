@@ -9,9 +9,9 @@
  *   - >= md: inline ghost links
  *   - <  md: hamburger toggles a floating fold-down panel
  */
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
-import BrandLogo from '@/Components/BrandLogo.vue';
+import { ref } from "vue";
+import { Link } from "@inertiajs/vue3";
+import BrandLogo from "@/Components/BrandLogo.vue";
 
 const open = ref(false);
 const toggle = () => (open.value = !open.value);
