@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Exam;
+use App\Models\ExamSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -33,6 +35,39 @@ class DashboardRoleTest extends TestCase
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Dashboard')
             ->where('auth.user.role', 'student')
+        );
+    }
+
+    public function test_lecturer_dashboard_counts_their_pending_review_sessions(): void
+    {
+        $lecturer = $this->createLecturer();
+        $otherLecturer = $this->createLecturer();
+
+        $ownExam = Exam::factory()->create(['created_by' => $lecturer->id]);
+        $otherExam = Exam::factory()->create(['created_by' => $otherLecturer->id]);
+
+        ExamSession::factory()->create([
+            'exam_id' => $ownExam->id,
+            'state' => 'pending_review',
+            'submitted_at' => now(),
+        ]);
+        ExamSession::factory()->create([
+            'exam_id' => $ownExam->id,
+            'state' => 'scored',
+            'submitted_at' => now(),
+        ]);
+        ExamSession::factory()->create([
+            'exam_id' => $otherExam->id,
+            'state' => 'pending_review',
+            'submitted_at' => now(),
+        ]);
+
+        $response = $this->actingAs($lecturer)->get('/lecturer');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Lecturer/Dashboard')
+            ->where('pendingReviews', 1)
         );
     }
 }

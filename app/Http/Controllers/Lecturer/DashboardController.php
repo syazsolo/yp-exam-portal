@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\ExamSession;
 use App\Models\SchoolClass;
 use App\Models\User;
+use App\States\ExamSession\PendingReview;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -47,7 +48,7 @@ class DashboardController extends Controller
                 'subjects' => $c->subjects->pluck('name'),
             ]);
 
-        $pendingReviews = ExamSession::where('status', 'under_review')
+        $pendingReviews = ExamSession::whereState('state', PendingReview::class)
             ->whereHas('exam', fn ($q) => $q->where('created_by', $lecturer->id))
             ->count();
 
