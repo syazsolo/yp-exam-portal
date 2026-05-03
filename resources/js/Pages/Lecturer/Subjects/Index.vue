@@ -1,12 +1,27 @@
 <script setup>
+import DataTable from "@/Components/DataTable.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link, router } from "@inertiajs/vue3";
 
 defineProps({ subjects: Array });
 
-function destroy(id) {
+const columns = [
+    { key: "name", label: "Name", type: "primary" },
+    { key: "description", label: "Description", fallback: "None" },
+    { key: "class_count", label: "Classes" },
+];
+
+const actions = [
+    {
+        type: "edit",
+        href: (subject) => route("lecturer.subjects.edit", subject.id),
+    },
+    { type: "delete" },
+];
+
+function destroy(subject) {
     if (confirm("Delete this subject?"))
-        router.delete(route("lecturer.subjects.destroy", id));
+        router.delete(route("lecturer.subjects.destroy", subject.id));
 }
 </script>
 
@@ -32,58 +47,13 @@ function destroy(id) {
                     >+ New Subject</Link
                 >
             </div>
-            <div class="overflow-hidden rounded-lg border bg-white">
-                <table class="w-full text-sm">
-                    <thead
-                        class="bg-gray-50 text-xs uppercase tracking-wide text-gray-400"
-                    >
-                        <tr>
-                            <th class="px-4 py-3 text-left">Name</th>
-                            <th class="px-4 py-3 text-left">Description</th>
-                            <th class="px-4 py-3 text-left">Classes</th>
-                            <th class="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr v-if="subjects.length === 0">
-                            <td
-                                colspan="4"
-                                class="px-4 py-6 text-center text-gray-400"
-                            >
-                                No subjects yet.
-                            </td>
-                        </tr>
-                        <tr
-                            v-for="s in subjects"
-                            :key="s.id"
-                            class="hover:bg-gray-50"
-                        >
-                            <td class="px-4 py-3 font-medium">{{ s.name }}</td>
-                            <td class="px-4 py-3 text-gray-500">
-                                {{ s.description || "—" }}
-                            </td>
-                            <td class="px-4 py-3 text-gray-500">
-                                {{ s.class_count }}
-                            </td>
-                            <td class="space-x-2 px-4 py-3 text-right">
-                                <Link
-                                    :href="
-                                        route('lecturer.subjects.edit', s.id)
-                                    "
-                                    class="text-sm text-gray-600 hover:underline"
-                                    >Edit</Link
-                                >
-                                <button
-                                    @click="destroy(s.id)"
-                                    class="text-sm text-red-600 hover:underline"
-                                >
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <DataTable
+                :columns="columns"
+                :rows="subjects"
+                :actions="actions"
+                empty-message="No subjects yet."
+                @delete="destroy"
+            />
         </div>
     </AuthenticatedLayout>
 </template>

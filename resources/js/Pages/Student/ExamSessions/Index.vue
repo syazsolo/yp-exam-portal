@@ -1,8 +1,26 @@
 <script setup>
+import DataTable from "@/Components/DataTable.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link } from "@inertiajs/vue3";
+import { Head } from "@inertiajs/vue3";
 
 defineProps({ sessions: Array });
+
+const columns = [
+    { key: "exam_title", label: "Exam", type: "primary" },
+    { key: "subject", label: "Subject" },
+    { key: "state", label: "Status", type: "status" },
+    { key: "score_label", label: "Score" },
+];
+
+const actions = [
+    {
+        name: "view",
+        icon: "eye",
+        label: "View",
+        variant: "primary",
+        href: (session) => route("student.exam-sessions.show", session.id),
+    },
+];
 </script>
 
 <template>
@@ -14,23 +32,12 @@ defineProps({ sessions: Array });
             </h2></template
         >
         <div class="mx-auto max-w-4xl px-4 py-8">
-            <ul class="divide-y rounded border border-gray-200 bg-white">
-                <li v-for="s in sessions" :key="s.id" class="p-4">
-                    <Link
-                        :href="route('student.exam-sessions.show', s.id)"
-                        class="block"
-                    >
-                        <div class="font-medium">{{ s.exam_title }}</div>
-                        <div class="text-sm text-gray-500">
-                            {{ s.subject }} · {{ s.state }} ·
-                            {{ s.score_label }}
-                        </div>
-                    </Link>
-                </li>
-                <li v-if="!sessions.length" class="p-4 text-sm text-gray-500">
-                    No past sessions.
-                </li>
-            </ul>
+            <DataTable
+                :columns="columns"
+                :rows="sessions"
+                :actions="actions"
+                empty-message="No past sessions."
+            />
         </div>
     </AuthenticatedLayout>
 </template>

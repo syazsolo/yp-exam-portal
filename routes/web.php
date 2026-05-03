@@ -26,6 +26,10 @@ Route::get('/dashboard', function () {
     return redirect()->route(Auth::user()->dashboardRoute());
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/playground/tables', function () {
+    return Inertia::render('Playground/Tables');
+})->middleware(['auth', 'verified'])->name('playground.tables');
+
 // Admin routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');

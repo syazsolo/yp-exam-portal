@@ -1,6 +1,7 @@
 <script setup>
+import DataTable from "@/Components/DataTable.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm, router, Link } from "@inertiajs/vue3";
+import { Head, Link, router, useForm } from "@inertiajs/vue3";
 
 const props = defineProps({ schoolClass: Object, subjects: Array });
 const addForm = useForm({ email: "" });
@@ -9,12 +10,24 @@ const addStudent = () =>
         onSuccess: () => addForm.reset(),
     });
 
-function removeStudent(userId) {
+const studentColumns = [
+    { key: "name", label: "Name", type: "primary" },
+    { key: "email", label: "Email" },
+];
+
+const studentActions = [
+    {
+        type: "delete",
+        label: "Remove",
+    },
+];
+
+function removeStudent(student) {
     if (confirm("Remove student?"))
         router.delete(
             route("lecturer.classes.students.remove", [
                 props.schoolClass.id,
-                userId,
+                student.id,
             ]),
         );
 }
@@ -28,7 +41,7 @@ function removeStudent(userId) {
                 <Link
                     :href="route('lecturer.classes.index')"
                     class="text-sm text-gray-400 hover:text-gray-600"
-                    >← Classes</Link
+                    >&lt; Classes</Link
                 >
                 <h2 class="text-xl font-semibold text-gray-800">
                     {{ schoolClass.name }}
@@ -90,52 +103,19 @@ function removeStudent(userId) {
             </div>
 
             <!-- students list -->
-            <div class="overflow-hidden rounded-lg border bg-white">
-                <div class="border-b bg-gray-50 px-5 py-3">
+            <DataTable
+                :columns="studentColumns"
+                :rows="schoolClass.students"
+                :actions="studentActions"
+                empty-message="No students yet."
+                @delete="removeStudent"
+            >
+                <template #caption>
                     <h3 class="font-semibold text-gray-700">
                         Students ({{ schoolClass.students.length }})
                     </h3>
-                </div>
-                <table class="w-full text-sm">
-                    <thead
-                        class="bg-gray-50 text-xs uppercase tracking-wide text-gray-400"
-                    >
-                        <tr>
-                            <th class="px-4 py-3 text-left">Name</th>
-                            <th class="px-4 py-3 text-left">Email</th>
-                            <th class="px-4 py-3"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        <tr v-if="schoolClass.students.length === 0">
-                            <td
-                                colspan="3"
-                                class="px-4 py-6 text-center text-gray-400"
-                            >
-                                No students yet.
-                            </td>
-                        </tr>
-                        <tr
-                            v-for="s in schoolClass.students"
-                            :key="s.id"
-                            class="hover:bg-gray-50"
-                        >
-                            <td class="px-4 py-3 font-medium">{{ s.name }}</td>
-                            <td class="px-4 py-3 text-gray-500">
-                                {{ s.email }}
-                            </td>
-                            <td class="px-4 py-3 text-right">
-                                <button
-                                    @click="removeStudent(s.id)"
-                                    class="text-xs text-red-500 hover:underline"
-                                >
-                                    Remove
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                </template>
+            </DataTable>
         </div>
     </AuthenticatedLayout>
 </template>
