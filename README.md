@@ -49,7 +49,7 @@ Configure your DB_DATABASE, DB_USERNAME, and DB_PASSWORD in .env before proceedi
 ### 3. Initialize
 
 ```bash
-php artisan migrate --seed
+php artisan migrate # or 'php artisan migrate --seed' for development
 npm run build # or 'npm run dev' for development
 php artisan serve
 ```
