@@ -21,3 +21,10 @@ yarn-error.log
 _ide_helper.php
 _ide_helper_models.php
 .phpstorm.meta.php
+
+# GitNexus local intelligence artifacts
+.gitnexus/
+AGENTS.md
+CLAUDE.md
+.claude/skills/gitnexus/
+.claude/worktrees/
