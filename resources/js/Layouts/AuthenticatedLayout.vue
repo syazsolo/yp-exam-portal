@@ -42,7 +42,7 @@ const logout = () => router.post(route("logout"));
 </script>
 
 <template>
-    <div class="flex h-screen w-screen overflow-hidden bg-ivory text-ink">
+    <div class="fixed inset-0 flex overflow-hidden bg-ivory text-ink">
         <!-- Mobile drawer scrim -->
         <div
             v-if="drawerOpen"
@@ -240,7 +240,7 @@ const logout = () => router.post(route("logout"));
             </div>
 
             <!-- Content -->
-            <main class="flex-1 overflow-y-auto">
+            <main class="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
                 <slot />
             </main>
         </div>

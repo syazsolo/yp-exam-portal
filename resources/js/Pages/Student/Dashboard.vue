@@ -44,7 +44,7 @@ function examActionLabel(exam) {
 <template>
     <Head title="Dashboard" />
     <AuthenticatedLayout title="Dashboard">
-        <div class="mx-auto max-w-4xl space-y-8 px-4 py-8">
+        <div class="w-full space-y-8 px-5 py-6 sm:px-9 sm:py-8">
             <div
                 v-if="$page.props.flash?.success"
                 class="rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
@@ -67,9 +67,9 @@ function examActionLabel(exam) {
                     <div
                         v-for="e in availableExams"
                         :key="e.id"
-                        class="flex items-center justify-between rounded-lg border bg-white p-4"
+                        class="flex flex-col gap-4 rounded-lg border bg-white p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
-                        <div>
+                        <div class="min-w-0">
                             <p class="font-medium text-gray-800">
                                 {{ e.title }}
                             </p>
@@ -92,7 +92,7 @@ function examActionLabel(exam) {
                                     e.session_id,
                                 )
                             "
-                            class="rounded bg-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+                            class="inline-flex w-full items-center justify-center rounded bg-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 sm:w-auto"
                         >
                             {{ examActionLabel(e) }}
                         </Link>
@@ -104,14 +104,14 @@ function examActionLabel(exam) {
                                     e.session_id,
                                 )
                             "
-                            class="rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
+                            class="inline-flex w-full items-center justify-center rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700 sm:w-auto"
                         >
                             {{ examActionLabel(e) }}
                         </Link>
                         <button
                             v-else
                             @click="start(e.id)"
-                            class="rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
+                            class="inline-flex w-full items-center justify-center rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700 sm:w-auto"
                         >
                             {{ examActionLabel(e) }}
                         </button>
