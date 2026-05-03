@@ -75,8 +75,11 @@ class ExamAccessTest extends TestCase
     public function test_lecturer_can_access_exams_for_their_subjects(): void
     {
         $lecturer = $this->createLecturer();
-        $subject = Subject::factory()->create();
-        $exam = Exam::factory()->create(['subject_id' => $subject->id]);
+        $subject = Subject::factory()->create(['created_by' => $lecturer->id]);
+        $exam = Exam::factory()->create([
+            'created_by' => $lecturer->id,
+            'subject_id' => $subject->id,
+        ]);
 
         $response = $this->actingAs($lecturer)
             ->get("/lecturer/exams/{$exam->id}");

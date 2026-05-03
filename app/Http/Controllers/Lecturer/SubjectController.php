@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Lecturer;
 use App\Http\Controllers\Controller;
 use App\Models\Subject;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class SubjectController extends Controller
@@ -45,21 +44,21 @@ class SubjectController extends Controller
 
     public function show(Subject $subject)
     {
-        $this->authorizeSubject($subject);
+        $this->authorize('view', $subject);
 
         return redirect()->route('lecturer.subjects.edit', $subject);
     }
 
     public function edit(Subject $subject)
     {
-        $this->authorizeSubject($subject);
+        $this->authorize('update', $subject);
 
         return Inertia::render('Lecturer/Subjects/Edit', ['subject' => $subject]);
     }
 
     public function update(Request $request, Subject $subject)
     {
-        $this->authorizeSubject($subject);
+        $this->authorize('update', $subject);
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -73,14 +72,9 @@ class SubjectController extends Controller
 
     public function destroy(Subject $subject)
     {
-        $this->authorizeSubject($subject);
+        $this->authorize('delete', $subject);
         $subject->delete();
 
         return redirect()->route('lecturer.subjects.index')->with('success', 'Subject deleted.');
-    }
-
-    private function authorizeSubject(Subject $subject): void
-    {
-        abort_unless($subject->created_by === Auth::id(), 403);
     }
 }

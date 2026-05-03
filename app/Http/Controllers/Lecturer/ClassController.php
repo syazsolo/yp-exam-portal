@@ -9,6 +9,7 @@ use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ClassController extends Controller
@@ -41,7 +42,7 @@ class ClassController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'subject_ids' => 'nullable|array',
-            'subject_ids.*' => 'exists:subjects,id',
+            'subject_ids.*' => Rule::exists('subjects', 'id')->where(fn ($query) => $query->where('created_by', $request->user()->id)),
         ]);
 
         $class = $request->user()->createdClasses()->create(['name' => $data['name']]);
@@ -54,7 +55,7 @@ class ClassController extends Controller
 
     public function show(SchoolClass $class)
     {
-        $this->authorizeClass($class);
+        $this->authorize('view', $class);
         $class->load(['subjects', 'students']);
         $subjects = Subject::where('created_by', Auth::id())->orderBy('name')->get(['id', 'name']);
 
@@ -71,7 +72,7 @@ class ClassController extends Controller
 
     public function edit(SchoolClass $class)
     {
-        $this->authorizeClass($class);
+        $this->authorize('update', $class);
         $class->load('subjects');
         $subjects = Subject::where('created_by', Auth::id())->orderBy('name')->get(['id', 'name']);
 
@@ -87,11 +88,11 @@ class ClassController extends Controller
 
     public function update(Request $request, SchoolClass $class)
     {
-        $this->authorizeClass($class);
+        $this->authorize('update', $class);
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'subject_ids' => 'nullable|array',
-            'subject_ids.*' => 'exists:subjects,id',
+            'subject_ids.*' => Rule::exists('subjects', 'id')->where(fn ($query) => $query->where('created_by', $request->user()->id)),
         ]);
 
         $class->update(['name' => $data['name']]);
@@ -102,7 +103,7 @@ class ClassController extends Controller
 
     public function destroy(SchoolClass $class)
     {
-        $this->authorizeClass($class);
+        $this->authorize('delete', $class);
         $class->delete();
 
         return redirect()->route('lecturer.classes.index')->with('success', 'Class deleted.');
@@ -110,7 +111,7 @@ class ClassController extends Controller
 
     public function addStudent(Request $request, SchoolClass $class)
     {
-        $this->authorizeClass($class);
+        $this->authorize('update', $class);
         $data = $request->validate(['email' => 'required|email|exists:users,email']);
 
         $student = User::where('email', $data['email'])
@@ -125,14 +126,9 @@ class ClassController extends Controller
 
     public function removeStudent(SchoolClass $class, User $user)
     {
-        $this->authorizeClass($class);
+        $this->authorize('update', $class);
         $class->students()->detach($user->id);
 
         return redirect()->back()->with('success', 'Student removed.');
-    }
-
-    private function authorizeClass(SchoolClass $class): void
-    {
-        abort_unless($class->created_by === Auth::id(), 403);
     }
 }

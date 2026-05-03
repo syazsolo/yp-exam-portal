@@ -20,7 +20,7 @@ class ExamCreationTest extends TestCase
     public function test_lecturer_can_create_an_exam_for_a_subject(): void
     {
         $lecturer = $this->createLecturer();
-        $subject = Subject::factory()->create();
+        $subject = Subject::factory()->create(['created_by' => $lecturer->id]);
 
         $response = $this->actingAs($lecturer)
             ->post("/lecturer/subjects/{$subject->id}/exams", [
@@ -59,7 +59,7 @@ class ExamCreationTest extends TestCase
     public function test_exam_end_time_must_be_after_start_time(): void
     {
         $lecturer = $this->createLecturer();
-        $subject = Subject::factory()->create();
+        $subject = Subject::factory()->create(['created_by' => $lecturer->id]);
 
         $response = $this->actingAs($lecturer)
             ->post("/lecturer/subjects/{$subject->id}/exams", [
@@ -193,10 +193,7 @@ class ExamCreationTest extends TestCase
     public function test_lecturer_can_assign_score_to_open_text_answer(): void
     {
         $lecturer = $this->createLecturer();
-        $question = Question::factory()->openText()->create(['weight' => 10.0]);
-        $answer = Answer::factory()->openText()->create([
-            'question_id' => $question->id,
-        ]);
+        $answer = $this->openTextAnswerOwnedBy($lecturer, 10.0);
 
         $response = $this->actingAs($lecturer)
             ->patch("/lecturer/answers/{$answer->id}/score", [
@@ -213,10 +210,7 @@ class ExamCreationTest extends TestCase
     public function test_lecturer_cannot_assign_score_above_question_weight(): void
     {
         $lecturer = $this->createLecturer();
-        $question = Question::factory()->openText()->create(['weight' => 5.0]);
-        $answer = Answer::factory()->openText()->create([
-            'question_id' => $question->id,
-        ]);
+        $answer = $this->openTextAnswerOwnedBy($lecturer, 5.0);
 
         $response = $this->actingAs($lecturer)
             ->patch("/lecturer/answers/{$answer->id}/score", [
@@ -229,10 +223,7 @@ class ExamCreationTest extends TestCase
     public function test_lecturer_cannot_assign_negative_score(): void
     {
         $lecturer = $this->createLecturer();
-        $question = Question::factory()->openText()->create(['weight' => 5.0]);
-        $answer = Answer::factory()->openText()->create([
-            'question_id' => $question->id,
-        ]);
+        $answer = $this->openTextAnswerOwnedBy($lecturer, 5.0);
 
         $response = $this->actingAs($lecturer)
             ->patch("/lecturer/answers/{$answer->id}/score", [
@@ -240,5 +231,28 @@ class ExamCreationTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors('score');
+    }
+
+    private function openTextAnswerOwnedBy($lecturer, float $weight): Answer
+    {
+        $subject = Subject::factory()->create(['created_by' => $lecturer->id]);
+        $exam = Exam::factory()->create([
+            'created_by' => $lecturer->id,
+            'subject_id' => $subject->id,
+        ]);
+        $question = Question::factory()->openText()->create([
+            'exam_id' => $exam->id,
+            'weight' => $weight,
+        ]);
+        $session = ExamSession::factory()->create([
+            'exam_id' => $exam->id,
+            'state' => 'pending_review',
+            'submitted_at' => now(),
+        ]);
+
+        return Answer::factory()->openText()->create([
+            'exam_session_id' => $session->id,
+            'question_id' => $question->id,
+        ]);
     }
 }

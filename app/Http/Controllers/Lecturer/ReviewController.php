@@ -6,14 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Answer;
 use App\Models\ExamSession;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ReviewController extends Controller
 {
     public function show(ExamSession $session)
     {
-        abort_unless($session->exam->created_by === Auth::id(), 403);
+        $this->authorize('review', $session);
+
         $session->load(['exam.questions.options', 'answers.question', 'answers.selectedOption', 'student']);
 
         return Inertia::render('Lecturer/Review/Show', [
@@ -45,6 +45,8 @@ class ReviewController extends Controller
     /** PATCH /lecturer/answers/{answer}/score */
     public function score(Request $request, Answer $answer)
     {
+        $this->authorize('score', $answer);
+
         abort_unless($answer->type === 'open_text', 422);
 
         $max = $answer->question->effectiveWeight();
@@ -64,7 +66,7 @@ class ReviewController extends Controller
 
     public function finalize(ExamSession $session)
     {
-        abort_unless($session->exam->created_by === Auth::id(), 403);
+        $this->authorize('finalize', $session);
         abort_unless($session->allOpenTextReviewed(), 422);
 
         $session->markAllReviewed();

@@ -6,14 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\Question;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class QuestionController extends Controller
 {
     public function create(Exam $exam)
     {
-        abort_unless($exam->created_by === Auth::id(), 403);
+        $this->authorize('update', $exam);
 
         return Inertia::render('Lecturer/Questions/Create', [
             'exam' => [
@@ -25,7 +24,7 @@ class QuestionController extends Controller
 
     public function store(Request $request, Exam $exam)
     {
-        abort_unless($exam->created_by === Auth::id(), 403);
+        $this->authorize('update', $exam);
 
         $data = $request->validate([
             'type' => 'required|in:mcq,open_text',
@@ -71,7 +70,7 @@ class QuestionController extends Controller
 
     public function edit(Question $question)
     {
-        abort_unless($question->exam->created_by === Auth::id(), 403);
+        $this->authorize('view', $question);
         $question->load('options');
 
         return Inertia::render('Lecturer/Questions/Edit', [
@@ -92,7 +91,7 @@ class QuestionController extends Controller
 
     public function update(Request $request, Question $question)
     {
-        abort_unless($question->exam->created_by === Auth::id(), 403);
+        $this->authorize('update', $question);
 
         $data = $request->validate([
             'text' => 'required|string',
@@ -120,7 +119,7 @@ class QuestionController extends Controller
 
     public function destroy(Question $question)
     {
-        abort_unless($question->exam->created_by === Auth::id(), 403);
+        $this->authorize('delete', $question);
         $examId = $question->exam_id;
         $question->delete();
 

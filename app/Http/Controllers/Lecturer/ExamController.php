@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class ExamController extends Controller
@@ -42,9 +43,16 @@ class ExamController extends Controller
     /** Handles POST /lecturer/exams and POST /lecturer/subjects/{subject}/exams */
     public function store(Request $request, ?Subject $subject = null)
     {
+        if ($subject !== null) {
+            $this->authorize('view', $subject);
+        }
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'subject_id' => [$subject ? 'nullable' : 'required', 'exists:subjects,id'],
+            'subject_id' => [
+                $subject ? 'nullable' : 'required',
+                Rule::exists('subjects', 'id')->where(fn ($query) => $query->where('created_by', $request->user()->id)),
+            ],
             'time_limit_minutes' => 'required|integer|min:1|max:300',
             'default_question_weight' => 'nullable|numeric|min:0.01',
             'starts_at' => 'required|date',
@@ -65,7 +73,8 @@ class ExamController extends Controller
 
     public function show(Exam $exam)
     {
-        // Any lecturer can view any exam — ownership only enforced on mutations.
+        $this->authorize('view', $exam);
+
         $exam->load(['subject', 'questions.options', 'sessions.student']);
 
         $sessions = $exam->sessions->map(fn ($s) => [
@@ -106,7 +115,7 @@ class ExamController extends Controller
 
     public function edit(Exam $exam)
     {
-        $this->authorizeExam($exam);
+        $this->authorize('update', $exam);
         abort_if($exam->status === 'active', 403, 'Cannot edit an active exam.');
 
         $subjects = Subject::where('created_by', Auth::id())->orderBy('name')->get(['id', 'name']);
@@ -127,12 +136,15 @@ class ExamController extends Controller
 
     public function update(Request $request, Exam $exam)
     {
-        $this->authorizeExam($exam);
+        $this->authorize('update', $exam);
         abort_if($exam->status === 'active', 403, 'Cannot edit an active exam.');
 
         $data = $request->validate([
             'title' => 'required|string|max:255',
-            'subject_id' => 'required|exists:subjects,id',
+            'subject_id' => [
+                'required',
+                Rule::exists('subjects', 'id')->where(fn ($query) => $query->where('created_by', $request->user()->id)),
+            ],
             'time_limit_minutes' => 'required|integer|min:1|max:300',
             'default_question_weight' => 'nullable|numeric|min:0.01',
             'starts_at' => 'required|date',
@@ -146,15 +158,10 @@ class ExamController extends Controller
 
     public function destroy(Exam $exam)
     {
-        $this->authorizeExam($exam);
+        $this->authorize('delete', $exam);
         abort_if($exam->status === 'active', 403, 'Cannot delete an active exam.');
         $exam->delete();
 
         return redirect()->route('lecturer.exams.index')->with('success', 'Exam deleted.');
-    }
-
-    private function authorizeExam(Exam $exam): void
-    {
-        abort_unless($exam->created_by === Auth::id(), 403);
     }
 }
