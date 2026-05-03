@@ -220,10 +220,12 @@ const badgeFor = (s) => statusStyle[s] || statusStyle.draft;
                 <div
                     class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
                 >
-                    <div
+                    <Link
                         v-for="cl in classes"
                         :key="cl.id"
-                        class="border border-rule bg-white px-5 py-4"
+                        :href="route('lecturer.classes.show', cl.id)"
+                        class="border border-rule bg-white px-5 py-4 transition hover:border-ink hover:bg-ivory/50 focus:outline-none focus:ring-2 focus:ring-ink focus:ring-offset-2 focus:ring-offset-ivory"
+                        :aria-label="`View ${cl.name}`"
                     >
                         <p class="text-[14px] font-bold text-ink">
                             {{ cl.name }}
@@ -246,7 +248,7 @@ const badgeFor = (s) => statusStyle[s] || statusStyle.draft;
                                 >No subjects</span
                             >
                         </div>
-                    </div>
+                    </Link>
                     <div
                         v-if="classes.length === 0"
                         class="col-span-full border border-dashed border-rule px-6 py-10 text-center text-sm text-ink-mute"
