@@ -19,7 +19,7 @@ const close = () => (open.value = false);
 </script>
 
 <template>
-    <header class="reveal reveal-1 relative z-20">
+    <header class="relative z-20">
         <div
             class="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8 sm:py-6"
         >
@@ -30,8 +30,15 @@ const close = () => (open.value = false);
 
             <!-- Desktop nav -->
             <nav class="hidden items-center gap-1 md:flex">
-                <Link :href="route('login')" class="btn-ghost">Sign in</Link>
-                <Link :href="route('register')" class="btn-ghost">
+                <Link
+                    :href="route('login')"
+                    class="inline-flex items-center gap-2 px-4 py-3 font-sans text-sm font-medium tracking-tight text-ink transition hover:text-oxblood focus:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-4 focus-visible:ring-offset-ivory"
+                    >Sign in</Link
+                >
+                <Link
+                    :href="route('register')"
+                    class="inline-flex items-center gap-2 px-4 py-3 font-sans text-sm font-medium tracking-tight text-ink transition hover:text-oxblood focus:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-4 focus-visible:ring-offset-ivory"
+                >
                     Register
                 </Link>
             </nav>

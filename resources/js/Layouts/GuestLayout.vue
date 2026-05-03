@@ -3,7 +3,6 @@ import { Link } from "@inertiajs/vue3";
 import BrandLogo from "@/Components/BrandLogo.vue";
 
 defineProps({
-    eyebrow: { type: String, default: "Welcome" },
     altLink: { type: Object, default: null }, // { href, label }
 });
 </script>

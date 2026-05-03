@@ -1,17 +1,17 @@
-/* ─────────────────────────────────────────────────────────────
-   YP EXAM PORTAL — DESIGN SYSTEM
+/*
+   YP EXAM PORTAL - DESIGN SYSTEM
    Direction: Editorial Scholar
-   Palette:   Ivory · Ink · Oxblood
-   Type:      Fraunces (display, opsz) · Inter Tight (body)
-   ───────────────────────────────────────────────────────────── */
+   Palette:   Ivory, Ink, Oxblood
+   Type:      Fraunces (display, opsz), Inter Tight (body)
+*/
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,1,300&family=Inter+Tight:wght@300;400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,400;9..144,0,500;9..144,1,300&family=Inter+Tight:wght@300;400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Tokens ──────────────────────────────────────────────── */
+/* Tokens */
 :root {
     --color-ivory: #f5f1e8;
     --color-ivory-deep: #ece5d2;
@@ -21,21 +21,21 @@
     --color-oxblood: #7a1f2b;
     --color-rule: rgba(26, 24, 20, 0.12);
 
-    --shadow-paper: 0 1px 0 rgba(26, 24, 20, 0.04),
-        0 24px 48px -24px rgba(26, 24, 20, 0.18);
+    --shadow-paper:
+        0 1px 0 rgba(26, 24, 20, 0.04), 0 24px 48px -24px rgba(26, 24, 20, 0.18);
 }
 
-/* ── Base ────────────────────────────────────────────────── */
+/* Base */
 @layer base {
     html {
         background: var(--color-ivory);
         color: var(--color-ink);
-        font-feature-settings: 'ss01', 'cv11';
+        font-feature-settings: "ss01", "cv11";
         -webkit-font-smoothing: antialiased;
     }
 
     body {
-        font-family: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+        font-family: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
         font-weight: 400;
         letter-spacing: -0.005em;
     }
@@ -43,8 +43,8 @@
     h1,
     h2,
     h3 {
-        font-family: 'Fraunces', ui-serif, Georgia, serif;
-        font-feature-settings: 'ss01';
+        font-family: "Fraunces", ui-serif, Georgia, serif;
+        font-feature-settings: "ss01";
         letter-spacing: -0.02em;
         color: var(--color-ink);
     }
@@ -52,50 +52,5 @@
     ::selection {
         background: var(--color-oxblood);
         color: var(--color-ivory);
-    }
-}
-
-/* ── Components ──────────────────────────────────────────── */
-@layer components {
-    /* Small-caps editorial label — used for section eyebrows */
-    .eyebrow {
-        @apply font-sans text-[11px] font-medium uppercase tracking-label text-ink-soft;
-    }
-
-    /* Hairline divider used in editorial layouts */
-    .rule {
-        @apply h-px w-full bg-[color:var(--color-rule)];
-    }
-
-    .btn-ghost {
-        @apply inline-flex items-center gap-2 px-4 py-3 font-sans text-sm font-medium tracking-tight text-ink transition;
-        @apply hover:text-oxblood focus:outline-none focus-visible:ring-2 focus-visible:ring-oxblood focus-visible:ring-offset-4 focus-visible:ring-offset-ivory;
-    }
-}
-
-/* ── Page-load reveal — single orchestrated entrance ─────── */
-@layer utilities {
-    .reveal {
-        opacity: 0;
-        transform: translateY(8px);
-        animation: reveal 700ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-    }
-    .reveal-1 {
-        animation-delay: 80ms;
-    }
-    .reveal-2 {
-        animation-delay: 200ms;
-    }
-    .reveal-3 {
-        animation-delay: 360ms;
-    }
-    .reveal-4 {
-        animation-delay: 520ms;
-    }
-    @keyframes reveal {
-        to {
-            opacity: 1;
-            transform: none;
-        }
     }
 }
