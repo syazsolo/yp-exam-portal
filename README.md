@@ -1,149 +1,87 @@
-# 📝 YP Exam Portal
+# YP Exam Portal
 
-> An online examination & student management portal — built for the **YP Technical Assessment**.
+A robust online examination and student management system.
 
-A portal for lecturers to manage & assign exams, which students take.
-
----
-
-## 👋 About Me
-
-**Author:** Mohamad Syazani Bin Zulkhairi<br>
-**Email:** syazanizul@gmail.com<br>
-**Phone:** 019-209 9853
-
----
-
-## 🎯 The Brief
-
-Build a portal for online examination + student management with:
-
-- **Roles** — Admin, Lecturer & Student
-- **Authentication** — secure login per user
-- **Exam Creation** — multiple-choice + open-text questions
-- **Class Management** — students grouped into classes
-- **Subject Management** — classes linked to multiple subjects
-- **Access Control** — students only see exams for their class
-- **Time Limit** — exams expire (e.g. 15 minutes)
-- **Extras** — bonus features as I see fit
-
----
+> Staging Environment: [Deployment Link (TBA)]<br>
+> Note: Refinements and UI polishing are ongoing through the staging link.
 
 ## 🛠️ Tech Stack
 
-- **Laravel 11**
-- **Laravel Breeze** (auth scaffold, Vue + Inertia stack)
-- **Vue 3** + **Inertia.js**
-- **MySQL**
-- **Tailwind CSS** + **Vite**
+Backend: Laravel 11 (PHP 8.2+)
 
----
+Frontend: Vue 3 + Inertia.js + Tailwind CSS
 
-## 🚀 Getting Started
+Auth: Laravel Breeze (Inertia/Vue stack)
 
-### Prerequisites
+Database: MySQL
 
-- PHP **8.2+**
-- Composer
-- Node.js **18+** & npm
-- MySQL (or any DB you prefer — adjust `.env`)
+## 🎯 Technical Highlights
 
-### Setup
+Beyond the core requirements of Role-Based Access Control (Admin/Lecturer/Student) and Exam Management, this implementation includes:
 
-**1. Clone**
+Mobile-First Design: Fully responsive interface across all roles.
+
+Setup Diagnostics: Custom boot-time health checks (DB connectivity, migration status, and environment configuration) to ensure zero-friction deployment.
+
+Component Playground: A hidden development route (/playground) used for prototyping and testing modular UI components (e.g., Data Tables).
+
+Administrative CLI: Custom command-line interface for secure Admin creation: php artisan admin:create.
+
+## 🚀 Quick Start
+
+### 1. Installation
 
 ```bash
 git clone https://github.com/syazsolo/yp-exam-portal.git
 cd yp-exam-portal
+composer install && npm install
 ```
 
-**2. Install dependencies**
-
-```bash
-composer install
-npm install
-```
-
-**3. Environment**
+### 2. Configuration
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-**4. Configure DB** — edit `.env`:
+Configure your DB_DATABASE, DB_USERNAME, and DB_PASSWORD in .env before proceeding.
 
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=yp_exam_portal
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-**5. Create the database**, then run migrations + seeders:
+### 3. Initialize
 
 ```bash
 php artisan migrate --seed
-```
-
-**6. Start the servers** — two terminals (Laravel + Vite for Vue/Inertia hot reload):
-
-```bash
-# Terminal 1
+npm run build # or 'npm run dev' for development
 php artisan serve
-
-# Terminal 2
-npm run dev
 ```
 
-**7. Open** 👉 `http://localhost:8000`
+## 🧪 Quality Assurance & CI
 
----
+The project enforces code quality through a strict CI pipeline.
 
-### Production build
+### The composer ci Command
 
-For a one-off frontend build:
+This is the primary quality gate. It executes the following in sequence:
+
+PHP Pint: Style enforcement and linting.
+
+Prettier: Frontend formatting check.
+
+PHPUnit: Feature and Unit testing suite.
+
+Vite Build: Asset compilation check.
+
+### Testing Utilities
 
 ```bash
-npm run build
+php artisan test     # Run test suite
+composer pint        # Format PHP code
+npm run format:check # Validate frontend formatting
 ```
 
----
+## 📌 Author
 
-## 🧪 Tests
+Mohamad Syazani
 
-Tests use a separate database (`yp_exam_portal_testing`). Setup once:
+Full-Stack Software Engineer
 
-```bash
-cp .env.testing.example .env.testing
-php artisan key:generate --env=testing
-# create the test database (yp_exam_portal_testing) in your DB of choice
-```
-
-Then any time:
-
-```bash
-php artisan test          # run the suite
-composer ci               # pint --test + tests + frontend build
-composer pint             # format PHP
-```
-
----
-
-## ✨ Scope Covered
-
-Beyond the brief, the project also includes:
-
-- **Setup diagnostics** — friendly diagnosis pages for common boot-time issues (DB offline, missing migrations, unset `APP_KEY`, unbuilt Vite assets, etc.) so misconfiguration is obvious at a glance.
-- **Admin role** — Admin accounts are not public registration accounts. Run `php artisan admin:create` to create one from the command line.
-- **Laravel IDE Helper**
-
----
-
-## 📌 Status
-
-🚧 **Work in progress.** Currently scaffolded with Laravel 11 + Breeze (Vue + Inertia). Role-based auth (Lecturer / Student) landed. Exam/class/subject features land iteratively over the 4-day window.
-
-This README will be updated as the project grows.
+syazanizul@gmail.com | 019-209 9853
