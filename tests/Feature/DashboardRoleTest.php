@@ -30,6 +30,32 @@ class DashboardRoleTest extends TestCase
         $response->assertRedirect(route('student.dashboard'));
     }
 
+    public function test_admin_dashboard_landing_redirects_to_admin_dashboard(): void
+    {
+        $user = $this->createAdmin();
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function test_admin_pages_receive_admin_navigation(): void
+    {
+        $user = $this->createAdmin();
+
+        $response = $this->actingAs($user)->get('/admin');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Dashboard')
+            ->has('app.nav', 1)
+            ->where('app.nav.0.label', 'Admin')
+            ->where('app.nav.0.href', route('admin.dashboard'))
+            ->where('app.nav.0.match', 'admin.dashboard')
+            ->where('app.nav.0.icon', 'home')
+        );
+    }
+
     public function test_lecturer_pages_receive_lecturer_navigation(): void
     {
         $user = $this->createLecturer();

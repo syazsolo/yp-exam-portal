@@ -28,6 +28,10 @@ Route::get('/dashboard', function () {
 
 // Admin routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Admin/Dashboard');
+    })->name('dashboard');
+
     Route::post('students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');
 });
 

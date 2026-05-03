@@ -11,6 +11,10 @@ class AppNavigation
      */
     public function for(User $user): array
     {
+        if ($user->isAdmin()) {
+            return $this->admin();
+        }
+
         if ($user->isLecturer()) {
             return $this->lecturer();
         }
@@ -20,6 +24,21 @@ class AppNavigation
         }
 
         return [];
+    }
+
+    /**
+     * @return array<int, array{label: string, href: string, match: string, icon: string}>
+     */
+    private function admin(): array
+    {
+        return [
+            [
+                'label' => 'Admin',
+                'href' => route('admin.dashboard'),
+                'match' => 'admin.dashboard',
+                'icon' => 'home',
+            ],
+        ];
     }
 
     /**
