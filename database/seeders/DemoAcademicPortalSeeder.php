@@ -23,42 +23,63 @@ class DemoAcademicPortalSeeder extends Seeder
     public function run(): void
     {
         $users = $this->seedUsers();
-        $subjects = $this->seedSubjects($users['lecturer']);
-        $classes = $this->seedClasses($users['lecturer'], $subjects);
+        $subjects = $this->seedSubjects($users['lecturers']);
+        $classes = $this->seedClasses($users['admin'], $subjects);
         $this->enrollStudents($classes, $users['students']);
 
-        $exams = $this->seedExams($users['lecturer']);
+        $exams = $this->seedExams($subjects);
         $this->seedAttempts($exams, $users['students']);
     }
 
     /**
-     * @return array{admin: User, lecturer: User, students: Collection<string, User>}
+     * @return array{admin: User, lecturers: Collection<string, User>, students: Collection<string, User>}
      */
     private function seedUsers(): array
     {
         $password = Hash::make(self::PASSWORD);
 
-        $admin = $this->seedUser('Registry Admin', 'admin@gmail.com', UserRole::Admin, $password);
-        $lecturer = $this->seedUser('Dr. Aisha Rahman', 'lecturer@gmail.com', UserRole::Lecturer, $password);
+        $admin = $this->seedUser('Principal Skinner', 'admin@gmail.com', UserRole::Admin, $password);
 
-        $students = collect([
-            ['name' => 'Mohamad Syazani Bin Zulkahiri', 'email' => 'student@gmail.com', 'class_id' => 'ROB-AUTO-2017'],
-            ['name' => 'Nurul Aqilah Hassan', 'email' => 'nurul.aqilah@example.test', 'class_id' => 'ROB-AUTO-2017'],
-            ['name' => 'Daniel Lee Jia Ming', 'email' => 'daniel.lee@example.test', 'class_id' => 'ROB-AUTO-2017'],
-            ['name' => 'Aisha Tan Mei Lin', 'email' => 'aisha.tan@example.test', 'class_id' => 'ROB-AUTO-2017'],
-            ['name' => 'Harith Iskandar', 'email' => 'harith.iskandar@example.test', 'class_id' => 'AI-APPS-2020'],
-            ['name' => 'Sofia Binti Azman', 'email' => 'sofia.azman@example.test', 'class_id' => 'AI-APPS-2020'],
-            ['name' => 'Priya Nair', 'email' => 'priya.nair@example.test', 'class_id' => 'AI-APPS-2020'],
-            ['name' => 'Adam Hakimi', 'email' => 'adam.hakimi@example.test', 'class_id' => 'ENG-FOUNDATION'],
-            ['name' => 'Chong Wei Ren', 'email' => 'wei.ren@example.test', 'class_id' => 'ENG-FOUNDATION'],
-        ])->mapWithKeys(function (array $student) use ($password) {
+        $lecturers = collect([
+            ['name' => 'Ms. Frizzle', 'email' => 'lecturer1@gmail.com'],
+            ['name' => 'Severus Snape', 'email' => 'lecturer2@gmail.com'],
+            ['name' => 'Walter White', 'email' => 'lecturer3@gmail.com'],
+        ])->mapWithKeys(fn (array $lecturer) => [
+            $lecturer['email'] => $this->seedUser($lecturer['name'], $lecturer['email'], UserRole::Lecturer, $password),
+        ]);
+
+        $studentNames = [
+            'Jimmy Neutron',
+            'Lisa Simpson',
+            'Dora Marquez',
+            'Ben Tennyson',
+            'Kim Possible',
+            'Phineas Flynn',
+            'Ferb Fletcher',
+            'Wednesday Addams',
+            'Matilda Wormwood',
+            'Harry Potter',
+            'Hermione Granger',
+            'Ron Weasley',
+            'Katara',
+            'Aang',
+            'Miles Morales',
+        ];
+        $classIds = ['ROB-AUTO-2017', 'AI-APPS-2020', 'ENG-FOUNDATION', 'DATA-SYSTEMS-2024', 'EMBEDDED-CLOUD-2025'];
+
+        $students = collect(range(1, 15))->mapWithKeys(function (int $number) use ($password, $studentNames, $classIds) {
+            $student = [
+                'name' => $studentNames[$number - 1],
+                'email' => "student{$number}@gmail.com",
+                'class_id' => $classIds[($number - 1) % count($classIds)],
+            ];
             $user = $this->seedUser($student['name'], $student['email'], UserRole::Student, $password);
             $user->setAttribute('seed_class_id', $student['class_id']);
 
             return [$student['email'] => $user];
         });
 
-        return compact('admin', 'lecturer', 'students');
+        return compact('admin', 'lecturers', 'students');
     }
 
     private function seedUser(string $name, string $email, UserRole $role, string $password): User
@@ -79,62 +100,81 @@ class DemoAcademicPortalSeeder extends Seeder
      *
      * @return Collection<string, Subject>
      */
-    private function seedSubjects(User $lecturer): Collection
+    private function seedSubjects(Collection $lecturers): Collection
     {
         return collect([
-            ['id' => 'ECP1016', 'name' => 'Computer and Program Design', 'description' => 'Introductory programming, problem decomposition, control flow, and practical debugging.'],
-            ['id' => 'ECT1016', 'name' => 'Circuit Theory', 'description' => 'DC/AC circuit analysis, network theorems, and electronics fundamentals.'],
-            ['id' => 'EEN1016', 'name' => 'Engineering Mathematics I', 'description' => 'Calculus, vectors, and applied engineering problem solving.'],
-            ['id' => 'ECP1026', 'name' => 'Algorithms and Data Structures', 'description' => 'Complexity, arrays, linked structures, trees, graphs, sorting, and searching.'],
-            ['id' => 'ECT3016', 'name' => 'Power Technology', 'description' => 'Power systems, machines, transformers, and electrical safety.'],
-            ['id' => 'ERT2016', 'name' => 'Engineering Mechanics', 'description' => 'Statics, dynamics, force systems, and mechanical design calculations.'],
-            ['id' => 'ECP3086', 'name' => 'Multimedia Technology and Applications', 'description' => 'Media pipelines, interface design, compression, and interactive applications.'],
-            ['id' => 'ERT3026', 'name' => 'Automation', 'description' => 'Sensors, actuators, PLC thinking, and industrial automation workflows.'],
-            ['id' => 'ERT3016', 'name' => 'Robotics', 'description' => 'Robot kinematics, motion planning, control loops, and embedded integration.'],
-            ['id' => 'ECP3266', 'name' => 'Artificial Intelligence and Applications', 'description' => 'Search, reasoning, machine learning basics, and applied intelligent systems.'],
-            ['id' => 'ERT3036', 'name' => 'Advanced Robotics', 'description' => 'Robot perception, localization, trajectory planning, and autonomous behavior.'],
-            ['id' => 'ECP4256', 'name' => 'Practical FPGA Design and Interfacing', 'description' => 'Hardware description, FPGA implementation, timing, and peripheral interfacing.'],
-            ['id' => 'ECP2036', 'name' => 'Manufacturing and Operations Management', 'description' => 'Production planning, quality, lean operations, and responsible engineering management.'],
-        ])->mapWithKeys(fn (array $subject) => [
-            $subject['id'] => Subject::updateOrCreate(
-                ['id' => $subject['id']],
-                [
-                    'name' => $subject['name'],
-                    'description' => $subject['description'],
-                    'created_by' => $lecturer->id,
-                ],
-            ),
-        ]);
+            ['id' => 'ECP1016', 'lecturer' => 1, 'name' => 'Computer and Program Design', 'description' => 'Introductory programming, problem decomposition, control flow, and practical debugging.'],
+            ['id' => 'ECT1016', 'lecturer' => 2, 'name' => 'Circuit Theory', 'description' => 'DC/AC circuit analysis, network theorems, and electronics fundamentals.'],
+            ['id' => 'EEN1016', 'lecturer' => 3, 'name' => 'Engineering Mathematics I', 'description' => 'Calculus, vectors, and applied engineering problem solving.'],
+            ['id' => 'ECP1026', 'lecturer' => 1, 'name' => 'Algorithms and Data Structures', 'description' => 'Complexity, arrays, linked structures, trees, graphs, sorting, and searching.'],
+            ['id' => 'ECT3016', 'lecturer' => 2, 'name' => 'Power Technology', 'description' => 'Power systems, machines, transformers, and electrical safety.'],
+            ['id' => 'ERT2016', 'lecturer' => 3, 'name' => 'Engineering Mechanics', 'description' => 'Statics, dynamics, force systems, and mechanical design calculations.'],
+            ['id' => 'ECP3086', 'lecturer' => 1, 'name' => 'Multimedia Technology and Applications', 'description' => 'Media pipelines, interface design, compression, and interactive applications.'],
+            ['id' => 'ERT3026', 'lecturer' => 2, 'name' => 'Automation', 'description' => 'Sensors, actuators, PLC thinking, and industrial automation workflows.'],
+            ['id' => 'ERT3016', 'lecturer' => 3, 'name' => 'Robotics', 'description' => 'Robot kinematics, motion planning, control loops, and embedded integration.'],
+            ['id' => 'ECP3266', 'lecturer' => 1, 'name' => 'Artificial Intelligence and Applications', 'description' => 'Search, reasoning, machine learning basics, and applied intelligent systems.'],
+            ['id' => 'ERT3036', 'lecturer' => 2, 'name' => 'Advanced Robotics', 'description' => 'Robot perception, localization, trajectory planning, and autonomous behavior.'],
+            ['id' => 'ECP4256', 'lecturer' => 3, 'name' => 'Practical FPGA Design and Interfacing', 'description' => 'Hardware description, FPGA implementation, timing, and peripheral interfacing.'],
+            ['id' => 'ECP2036', 'lecturer' => 1, 'name' => 'Manufacturing and Operations Management', 'description' => 'Production planning, quality, lean operations, and responsible engineering management.'],
+            ['id' => 'ECP2046', 'lecturer' => 2, 'name' => 'Database Systems', 'description' => 'Relational design, SQL, indexing, transactions, and operational data quality.'],
+            ['id' => 'EEN2026', 'lecturer' => 3, 'name' => 'Engineering Mathematics II', 'description' => 'Differential equations, transforms, matrices, and numerical methods.'],
+            ['id' => 'ENG1026', 'lecturer' => 1, 'name' => 'Technical Communication', 'description' => 'Engineering reports, technical briefings, documentation, and presentation craft.'],
+            ['id' => 'ERT3046', 'lecturer' => 2, 'name' => 'Control Systems', 'description' => 'Feedback control, transfer functions, stability, and controller tuning.'],
+            ['id' => 'ECP4096', 'lecturer' => 3, 'name' => 'Cloud Applications', 'description' => 'Service design, deployment pipelines, observability, and cloud reliability.'],
+        ])->mapWithKeys(function (array $subject) use ($lecturers) {
+            $lecturer = $lecturers->get("lecturer{$subject['lecturer']}@gmail.com");
+
+            return [
+                $subject['id'] => Subject::updateOrCreate(
+                    ['id' => $subject['id']],
+                    [
+                        'name' => $subject['name'],
+                        'description' => $subject['description'],
+                        'created_by' => $lecturer->id,
+                    ],
+                ),
+            ];
+        });
     }
 
     /**
      * @param  Collection<string, Subject>  $subjects
      * @return Collection<string, SchoolClass>
      */
-    private function seedClasses(User $lecturer, Collection $subjects): Collection
+    private function seedClasses(User $admin, Collection $subjects): Collection
     {
         return collect([
             [
                 'id' => 'ROB-AUTO-2017',
                 'name' => 'Robotics & Automation Cohort 2017',
-                'subjects' => ['ECP1016', 'ECT1016', 'EEN1016', 'ECP1026', 'ERT3026', 'ERT3016', 'ERT3036', 'ECP4256'],
+                'subjects' => ['ECP1016', 'ECT1016', 'EEN1016', 'ERT3026', 'ERT3016', 'ERT3036'],
             ],
             [
                 'id' => 'AI-APPS-2020',
                 'name' => 'AI Applications Studio 2020',
-                'subjects' => ['ECP3266', 'ECP3086', 'ECP1026', 'ECP2036', 'EEN1016'],
+                'subjects' => ['ECP3266', 'ECP3086', 'ECP1026', 'ECP2046', 'EEN1016'],
             ],
             [
                 'id' => 'ENG-FOUNDATION',
                 'name' => 'Engineering Foundation Lab',
-                'subjects' => ['ECT1016', 'EEN1016', 'ERT2016', 'ECT3016'],
+                'subjects' => ['ECT1016', 'EEN1016', 'ERT2016', 'ECT3016', 'ENG1026'],
             ],
-        ])->mapWithKeys(function (array $class) use ($lecturer, $subjects) {
+            [
+                'id' => 'DATA-SYSTEMS-2024',
+                'name' => 'Data Systems Cohort 2024',
+                'subjects' => ['ECP2046', 'ECP1026', 'ECP3266', 'EEN2026', 'ECP2036'],
+            ],
+            [
+                'id' => 'EMBEDDED-CLOUD-2025',
+                'name' => 'Embedded Cloud Studio 2025',
+                'subjects' => ['ECP4256', 'ECP4096', 'ERT3046', 'ECT1016', 'ENG1026'],
+            ],
+        ])->mapWithKeys(function (array $class) use ($admin, $subjects) {
             $schoolClass = SchoolClass::updateOrCreate(
                 ['id' => $class['id']],
                 [
                     'name' => $class['name'],
-                    'created_by' => $lecturer->id,
+                    'created_by' => $admin->id,
                 ],
             );
 
@@ -171,15 +211,17 @@ class DemoAcademicPortalSeeder extends Seeder
     /**
      * @return Collection<string, Exam>
      */
-    private function seedExams(User $lecturer): Collection
+    private function seedExams(Collection $subjects): Collection
     {
         return collect($this->examBlueprints(now()))
-            ->mapWithKeys(function (array $blueprint, string $key) use ($lecturer) {
+            ->mapWithKeys(function (array $blueprint, string $key) use ($subjects) {
+                $subject = $subjects->get($blueprint['subject_id']);
+
                 $exam = Exam::updateOrCreate(
                     ['title' => $blueprint['title']],
                     [
                         'subject_id' => $blueprint['subject_id'],
-                        'created_by' => $lecturer->id,
+                        'created_by' => $subject->created_by,
                         'time_limit_minutes' => $blueprint['time_limit_minutes'],
                         'default_question_weight' => $blueprint['default_question_weight'],
                         'status' => $blueprint['status'],
@@ -357,6 +399,78 @@ class DemoAcademicPortalSeeder extends Seeder
                     $this->openText('Explain one debugging step when a design works in simulation but fails on the FPGA board.', 6),
                 ],
             ],
+            'database-indexing' => [
+                'title' => 'Database Systems Indexing Quiz',
+                'subject_id' => 'ECP2046',
+                'time_limit_minutes' => 30,
+                'default_question_weight' => 2.0,
+                'status' => 'active',
+                'starts_at' => $now->copy()->subMinutes(10),
+                'ends_at' => $now->copy()->addHours(3),
+                'questions' => [
+                    $this->mcq('Which index is usually most useful for equality lookups on a single unique column?', 2, [
+                        ['B-tree index', true],
+                        ['Full table scan', false],
+                        ['Random sleep', false],
+                        ['Manual spreadsheet sort', false],
+                    ]),
+                    $this->openText('Describe one trade-off of adding many indexes to a write-heavy table.', 5),
+                ],
+            ],
+            'math-ii-methods' => [
+                'title' => 'Engineering Mathematics II Methods Check',
+                'subject_id' => 'EEN2026',
+                'time_limit_minutes' => 55,
+                'default_question_weight' => 2.5,
+                'status' => 'draft',
+                'starts_at' => $now->copy()->addDays(5),
+                'ends_at' => $now->copy()->addDays(5)->addMinutes(55),
+                'questions' => [
+                    $this->mcq('Laplace transforms are commonly used to solve which kind of problem?', 2.5, [
+                        ['Differential equations', true],
+                        ['Color palette selection', false],
+                        ['Email verification', false],
+                        ['String slug formatting', false],
+                    ]),
+                    $this->openText('Explain how eigenvalues can help describe the behavior of a linear system.', 6),
+                ],
+            ],
+            'controls-stability' => [
+                'title' => 'Control Systems Stability Drill',
+                'subject_id' => 'ERT3046',
+                'time_limit_minutes' => 40,
+                'default_question_weight' => 2.0,
+                'status' => 'active',
+                'starts_at' => $now->copy()->subHour(),
+                'ends_at' => $now->copy()->addHours(6),
+                'questions' => [
+                    $this->mcq('What does negative feedback usually improve in a control loop?', 2, [
+                        ['Stability and disturbance rejection', true],
+                        ['Password length', false],
+                        ['Table column count', false],
+                        ['File upload speed only', false],
+                    ]),
+                    $this->openText('Name one symptom of an over-tuned controller in a physical system.', 5),
+                ],
+            ],
+            'cloud-observability' => [
+                'title' => 'Cloud Applications Observability Lab',
+                'subject_id' => 'ECP4096',
+                'time_limit_minutes' => 45,
+                'default_question_weight' => 2.0,
+                'status' => 'closed',
+                'starts_at' => $now->copy()->subDays(14),
+                'ends_at' => $now->copy()->subDays(14)->addMinutes(45),
+                'questions' => [
+                    $this->mcq('Which signal most directly tells you how often requests fail?', 2, [
+                        ['Error rate', true],
+                        ['Logo size', false],
+                        ['Number of menu items', false],
+                        ['Keyboard layout', false],
+                    ]),
+                    $this->openText('List two metrics you would monitor for an exam-taking page during peak usage.', 6),
+                ],
+            ],
         ];
     }
 
@@ -417,7 +531,7 @@ class DemoAcademicPortalSeeder extends Seeder
     {
         $this->seedAttempt(
             exam: $exams['programming-lab'],
-            student: $students['student@gmail.com'],
+            student: $students['student1@gmail.com'],
             state: 'pending',
             startedAt: now()->subMinutes(12),
             submittedAt: null,
@@ -430,7 +544,7 @@ class DemoAcademicPortalSeeder extends Seeder
 
         $this->seedAttempt(
             exam: $exams['circuit-midterm'],
-            student: $students['student@gmail.com'],
+            student: $students['student1@gmail.com'],
             state: 'scored',
             startedAt: now()->subDays(10)->addMinutes(3),
             submittedAt: now()->subDays(10)->addMinutes(54),
@@ -447,7 +561,7 @@ class DemoAcademicPortalSeeder extends Seeder
 
         $this->seedAttempt(
             exam: $exams['math-worked-solutions'],
-            student: $students['student@gmail.com'],
+            student: $students['student1@gmail.com'],
             state: 'pending_review',
             startedAt: now()->subDays(3)->addMinutes(4),
             submittedAt: now()->subDays(3)->addMinutes(68),
@@ -460,7 +574,7 @@ class DemoAcademicPortalSeeder extends Seeder
 
         $this->seedAttempt(
             exam: $exams['fpga-lab'],
-            student: $students['daniel.lee@example.test'],
+            student: $students['student3@gmail.com'],
             state: 'scored',
             startedAt: now()->subDays(21)->addMinutes(2),
             submittedAt: now()->subDays(21)->addMinutes(39),
@@ -476,7 +590,7 @@ class DemoAcademicPortalSeeder extends Seeder
 
         $this->seedAttempt(
             exam: $exams['robotics-practical'],
-            student: $students['nurul.aqilah@example.test'],
+            student: $students['student2@gmail.com'],
             state: 'pending',
             startedAt: now()->subMinutes(3),
             submittedAt: null,
@@ -487,7 +601,7 @@ class DemoAcademicPortalSeeder extends Seeder
 
         $this->seedAttempt(
             exam: $exams['automation-checkpoint'],
-            student: $students['harith.iskandar@example.test'],
+            student: $students['student5@gmail.com'],
             state: 'pending_review',
             startedAt: now()->subMinutes(44),
             submittedAt: now()->subMinutes(8),
