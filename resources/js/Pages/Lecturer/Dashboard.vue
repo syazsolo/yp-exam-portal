@@ -251,12 +251,7 @@ const badgeFor = (s) => statusStyle[s] || statusStyle.draft;
                         v-if="classes.length === 0"
                         class="col-span-full border border-dashed border-rule px-6 py-10 text-center text-sm text-ink-mute"
                     >
-                        No classes yet.
-                        <Link
-                            :href="route('lecturer.classes.create')"
-                            class="underline underline-offset-2 hover:text-ink"
-                            >Create one</Link
-                        >.
+                        No assigned classes yet.
                     </div>
                 </div>
             </section>

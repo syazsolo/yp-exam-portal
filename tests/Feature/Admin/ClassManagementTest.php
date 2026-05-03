@@ -3,7 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\SchoolClass;
+use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ClassManagementTest extends TestCase
@@ -28,6 +30,13 @@ class ClassManagementTest extends TestCase
             'user_id' => $student->id,
             'class_id' => $class->id,
         ]);
+
+        $this->assertNotNull(
+            DB::table('class_user')
+                ->where('user_id', $student->id)
+                ->where('class_id', $class->id)
+                ->value('assigned_at')
+        );
     }
 
     public function test_non_admin_cannot_assign_student_to_class(): void
@@ -126,5 +135,69 @@ class ClassManagementTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page->where('noClass', false));
+    }
+
+    public function test_admin_can_create_class_with_subjects_from_multiple_lecturers(): void
+    {
+        $admin = $this->createAdmin();
+        $lecturerA = $this->createLecturer();
+        $lecturerB = $this->createLecturer();
+        $subjectA = Subject::factory()->create(['created_by' => $lecturerA->id]);
+        $subjectB = Subject::factory()->create(['created_by' => $lecturerB->id]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.classes.store'), [
+                'id' => 'CLS-MIXED-A',
+                'name' => 'Mixed Lecturer Class A',
+                'subject_ids' => [$subjectA->id, $subjectB->id],
+            ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('school_classes', [
+            'id' => 'CLS-MIXED-A',
+            'name' => 'Mixed Lecturer Class A',
+            'created_by' => $admin->id,
+        ]);
+        $this->assertDatabaseHas('class_subject', [
+            'class_id' => 'CLS-MIXED-A',
+            'subject_id' => $subjectA->id,
+        ]);
+        $this->assertDatabaseHas('class_subject', [
+            'class_id' => 'CLS-MIXED-A',
+            'subject_id' => $subjectB->id,
+        ]);
+    }
+
+    public function test_admin_can_sync_class_subjects_from_multiple_lecturers(): void
+    {
+        $admin = $this->createAdmin();
+        $lecturerA = $this->createLecturer();
+        $lecturerB = $this->createLecturer();
+        $oldSubject = Subject::factory()->create(['created_by' => $lecturerA->id]);
+        $newSubjectA = Subject::factory()->create(['created_by' => $lecturerA->id]);
+        $newSubjectB = Subject::factory()->create(['created_by' => $lecturerB->id]);
+        $class = SchoolClass::factory()->create(['created_by' => $admin->id]);
+        $class->subjects()->attach($oldSubject->id);
+
+        $response = $this->actingAs($admin)
+            ->patch(route('admin.classes.update', $class), [
+                'name' => 'Mixed Lecturer Class Updated',
+                'subject_ids' => [$newSubjectA->id, $newSubjectB->id],
+            ]);
+
+        $response->assertRedirect();
+        $this->assertSame('Mixed Lecturer Class Updated', $class->fresh()->name);
+        $this->assertDatabaseMissing('class_subject', [
+            'class_id' => $class->id,
+            'subject_id' => $oldSubject->id,
+        ]);
+        $this->assertDatabaseHas('class_subject', [
+            'class_id' => $class->id,
+            'subject_id' => $newSubjectA->id,
+        ]);
+        $this->assertDatabaseHas('class_subject', [
+            'class_id' => $class->id,
+            'subject_id' => $newSubjectB->id,
+        ]);
     }
 }

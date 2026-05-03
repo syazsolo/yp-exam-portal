@@ -16,12 +16,16 @@ class DashboardController extends Controller
     public function __invoke(Request $request)
     {
         $lecturer = $request->user();
+        $classIds = SchoolClass::whereHas('subjects', fn ($query) => $query->where('subjects.created_by', $lecturer->id))
+            ->pluck('id');
 
         $stats = [
             'active_exams' => Exam::where('created_by', $lecturer->id)->where('status', 'active')->count(),
             'total_exams' => Exam::where('created_by', $lecturer->id)->count(),
-            'classes' => SchoolClass::where('created_by', $lecturer->id)->count(),
-            'students' => User::whereHas('classes', fn ($q) => $q->where('created_by', $lecturer->id))->count(),
+            'classes' => $classIds->count(),
+            'students' => User::whereHas('classes', fn ($q) => $q
+                ->whereIn('school_classes.id', $classIds)
+                ->whereNull('class_user.unassigned_at'))->count(),
         ];
 
         $recentExams = Exam::with(['subject', 'sessions'])
@@ -39,7 +43,8 @@ class DashboardController extends Controller
             ]);
 
         $classes = SchoolClass::with(['subjects', 'students'])
-            ->where('created_by', $lecturer->id)
+            ->whereKey($classIds)
+            ->orderBy('name')
             ->get()
             ->map(fn ($c) => [
                 'id' => $c->id,

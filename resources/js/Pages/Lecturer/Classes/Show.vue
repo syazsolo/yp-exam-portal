@@ -1,36 +1,14 @@
 <script setup>
 import DataTable from "@/Components/DataTable.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, Link, router, useForm } from "@inertiajs/vue3";
+import { Head, Link } from "@inertiajs/vue3";
 
-const props = defineProps({ schoolClass: Object, subjects: Array });
-const addForm = useForm({ email: "" });
-const addStudent = () =>
-    addForm.post(route("lecturer.classes.students.add", props.schoolClass.id), {
-        onSuccess: () => addForm.reset(),
-    });
+defineProps({ schoolClass: Object });
 
 const studentColumns = [
     { key: "name", label: "Name", type: "primary" },
     { key: "email", label: "Email" },
 ];
-
-const studentActions = [
-    {
-        type: "delete",
-        label: "Remove",
-    },
-];
-
-function removeStudent(student) {
-    if (confirm("Remove student?"))
-        router.delete(
-            route("lecturer.classes.students.remove", [
-                props.schoolClass.id,
-                student.id,
-            ]),
-        );
-}
 </script>
 
 <template>
@@ -74,41 +52,11 @@ function removeStudent(student) {
                 </div>
             </div>
 
-            <!-- add student -->
-            <div class="rounded-lg border bg-white p-5">
-                <h3 class="mb-3 font-semibold text-gray-700">
-                    Add Student by Email
-                </h3>
-                <div class="flex gap-2">
-                    <input
-                        v-model="addForm.email"
-                        type="email"
-                        placeholder="student@example.com"
-                        class="flex-1 rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400"
-                    />
-                    <button
-                        @click="addStudent"
-                        :disabled="addForm.processing"
-                        class="rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700 disabled:opacity-50"
-                    >
-                        Add
-                    </button>
-                </div>
-                <p
-                    v-if="addForm.errors.email"
-                    class="mt-1 text-xs text-red-600"
-                >
-                    {{ addForm.errors.email }}
-                </p>
-            </div>
-
             <!-- students list -->
             <DataTable
                 :columns="studentColumns"
                 :rows="schoolClass.students"
-                :actions="studentActions"
                 empty-message="No students yet."
-                @delete="removeStudent"
             >
                 <template #caption>
                     <h3 class="font-semibold text-gray-700">

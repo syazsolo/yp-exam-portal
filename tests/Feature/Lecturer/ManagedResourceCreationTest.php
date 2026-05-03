@@ -31,25 +31,20 @@ class ManagedResourceCreationTest extends TestCase
         );
     }
 
-    // TODO - maybe should provide an ID
-    public function test_lecturer_can_create_class_without_providing_id(): void
+    public function test_lecturer_cannot_create_class(): void
     {
         $lecturer = $this->createLecturer();
 
         $response = $this->actingAs($lecturer)
-            ->post(route('lecturer.classes.store'), [
+            ->post('/lecturer/classes', [
                 'name' => 'Class A1',
                 'subject_ids' => [],
             ]);
 
-        $response->assertRedirect(route('lecturer.classes.index'));
-        $this->assertDatabaseHas('school_classes', [
+        $this->assertContains($response->getStatusCode(), [404, 405]);
+        $this->assertDatabaseMissing('school_classes', [
             'name' => 'Class A1',
             'created_by' => $lecturer->id,
         ]);
-
-        $this->assertNotNull(
-            $lecturer->createdClasses()->where('name', 'Class A1')->value('id')
-        );
     }
 }

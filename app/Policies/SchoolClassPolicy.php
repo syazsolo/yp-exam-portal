@@ -9,16 +9,22 @@ class SchoolClassPolicy
 {
     public function view(User $user, SchoolClass $class): bool
     {
-        return $class->created_by === $user->id;
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $class->subjects()
+            ->where('subjects.created_by', $user->id)
+            ->exists();
     }
 
     public function update(User $user, SchoolClass $class): bool
     {
-        return $class->created_by === $user->id;
+        return $user->isAdmin();
     }
 
     public function delete(User $user, SchoolClass $class): bool
     {
-        return $class->created_by === $user->id;
+        return $user->isAdmin();
     }
 }

@@ -14,7 +14,7 @@ class SchoolClassFactory extends Factory
         return [
             'id' => strtoupper(fake()->unique()->bothify('??###?')),
             'name' => 'Class '.fake()->randomElement(['A', 'B', 'C', 'D', 'E', 'F']).fake()->numberBetween(1, 9),
-            'created_by' => User::factory()->lecturer(),
+            'created_by' => User::factory()->admin(),
         ];
     }
 }

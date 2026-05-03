@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ClassController as AdminClassController;
 use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Lecturer\ClassController;
 use App\Http\Controllers\Lecturer\DashboardController as LecturerDashboard;
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     })->name('dashboard');
 
     Route::post('students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');
+    Route::resource('classes', AdminClassController::class)->only(['store', 'update', 'destroy']);
 });
 
 // Lecturer routes
@@ -40,9 +42,7 @@ Route::middleware(['auth', 'verified', 'lecturer'])->prefix('lecturer')->name('l
     Route::get('/', LecturerDashboard::class)->name('dashboard');
 
     Route::resource('subjects', SubjectController::class);
-    Route::resource('classes', ClassController::class);
-    Route::post('classes/{class}/students', [ClassController::class, 'addStudent'])->name('classes.students.add');
-    Route::delete('classes/{class}/students/{user}', [ClassController::class, 'removeStudent'])->name('classes.students.remove');
+    Route::resource('classes', ClassController::class)->only(['index', 'show']);
 
     // Exams — nested under subject for creation, standalone for management
     Route::post('exams', [ExamController::class, 'store'])->name('exams.store');

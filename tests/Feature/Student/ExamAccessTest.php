@@ -35,6 +35,42 @@ class ExamAccessTest extends TestCase
             ->where('exams.0.session_id', null));
     }
 
+    public function test_student_can_list_active_exams_from_multiple_lecturers_in_their_class(): void
+    {
+        $student = $this->createStudent();
+        $class = SchoolClass::factory()->create();
+        $lecturerA = $this->createLecturer();
+        $lecturerB = $this->createLecturer();
+        $subjectA = Subject::factory()->create(['created_by' => $lecturerA->id]);
+        $subjectB = Subject::factory()->create(['created_by' => $lecturerB->id]);
+        $examA = Exam::factory()->active()->create([
+            'created_by' => $lecturerA->id,
+            'subject_id' => $subjectA->id,
+        ]);
+        $examB = Exam::factory()->active()->create([
+            'created_by' => $lecturerB->id,
+            'subject_id' => $subjectB->id,
+        ]);
+
+        $student->classes()->attach($class->id, ['assigned_at' => now()]);
+        $class->subjects()->attach([$subjectA->id, $subjectB->id]);
+
+        $response = $this->actingAs($student)
+            ->get('/student/exams');
+
+        $response->assertInertia(fn ($page) => $page
+            ->component('Student/Exams/Index')
+            ->has('exams', 2)
+            ->where('exams', fn ($exams) => collect($exams)
+                ->pluck('id')
+                ->sort()
+                ->values()
+                ->all() === collect([$examA->id, $examB->id])
+                ->sort()
+                ->values()
+                ->all()));
+    }
+
     public function test_student_does_not_list_exam_when_subject_is_not_in_their_class(): void
     {
         $student = $this->createStudent();

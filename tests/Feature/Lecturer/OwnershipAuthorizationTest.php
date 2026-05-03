@@ -6,7 +6,6 @@ use App\Models\Answer;
 use App\Models\Exam;
 use App\Models\ExamSession;
 use App\Models\Question;
-use App\Models\SchoolClass;
 use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -143,50 +142,6 @@ class OwnershipAuthorizationTest extends TestCase
 
         $response->assertSessionHasErrors('subject_id');
         $this->assertSame($ownedSubject->id, $exam->fresh()->subject_id);
-    }
-
-    public function test_lecturer_cannot_attach_foreign_subject_when_creating_class(): void
-    {
-        $lecturer = $this->createLecturer();
-        $otherLecturer = $this->createLecturer();
-        $foreignSubject = Subject::factory()->create(['created_by' => $otherLecturer->id]);
-
-        $response = $this->actingAs($lecturer)
-            ->post(route('lecturer.classes.store'), [
-                'name' => 'Class A1',
-                'subject_ids' => [$foreignSubject->id],
-            ]);
-
-        $response->assertSessionHasErrors('subject_ids.0');
-        $this->assertDatabaseMissing('class_subject', [
-            'subject_id' => $foreignSubject->id,
-        ]);
-    }
-
-    public function test_lecturer_cannot_sync_foreign_subject_when_updating_class(): void
-    {
-        $lecturer = $this->createLecturer();
-        $otherLecturer = $this->createLecturer();
-        $ownedSubject = Subject::factory()->create(['created_by' => $lecturer->id]);
-        $foreignSubject = Subject::factory()->create(['created_by' => $otherLecturer->id]);
-        $class = SchoolClass::factory()->create(['created_by' => $lecturer->id]);
-        $class->subjects()->attach($ownedSubject->id);
-
-        $response = $this->actingAs($lecturer)
-            ->patch(route('lecturer.classes.update', $class), [
-                'name' => 'Class A1 Updated',
-                'subject_ids' => [$foreignSubject->id],
-            ]);
-
-        $response->assertSessionHasErrors('subject_ids.0');
-        $this->assertDatabaseHas('class_subject', [
-            'class_id' => $class->id,
-            'subject_id' => $ownedSubject->id,
-        ]);
-        $this->assertDatabaseMissing('class_subject', [
-            'class_id' => $class->id,
-            'subject_id' => $foreignSubject->id,
-        ]);
     }
 
     public function test_lecturer_cannot_review_foreign_session(): void
