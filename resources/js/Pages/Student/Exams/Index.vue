@@ -13,12 +13,7 @@ function start(examId) {
 
 <template>
     <Head title="Available Exams" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                Available Exams
-            </h2></template
-        >
+    <AuthenticatedLayout title="Available Exams">
         <div class="mx-auto max-w-3xl space-y-4 px-4 py-8">
             <div v-if="exams.length === 0" class="text-sm text-gray-400">
                 No active exams right now.

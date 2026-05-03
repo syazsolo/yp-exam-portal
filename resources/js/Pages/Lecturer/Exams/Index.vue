@@ -42,12 +42,7 @@ function destroy(exam) {
 
 <template>
     <Head title="Exams" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                Exams
-            </h2></template
-        >
+    <AuthenticatedLayout title="Exams">
         <div class="mx-auto max-w-5xl space-y-4 px-4 py-8">
             <div
                 v-if="$page.props.flash?.success"

@@ -15,12 +15,7 @@ const submit = () => form.patch(route("lecturer.exams.update", props.exam.id));
 
 <template>
     <Head title="Edit Exam" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                Edit Exam
-            </h2></template
-        >
+    <AuthenticatedLayout title="Edit Exam">
         <div class="mx-auto max-w-lg px-4 py-8">
             <div class="space-y-4 rounded-lg border bg-white p-6">
                 <div>

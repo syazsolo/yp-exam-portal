@@ -27,12 +27,7 @@ function destroy(subject) {
 
 <template>
     <Head title="Subjects" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                Subjects
-            </h2></template
-        >
+    <AuthenticatedLayout title="Subjects">
         <div class="mx-auto max-w-4xl space-y-4 px-4 py-8">
             <div
                 v-if="$page.props.flash?.success"

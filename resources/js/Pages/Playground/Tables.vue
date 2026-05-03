@@ -11,13 +11,7 @@ const lastAction = ref("No action yet");
 
 <template>
     <Head title="Table Playground" />
-    <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold text-gray-800">
-                Table Playground
-            </h2>
-        </template>
-
+    <AuthenticatedLayout title="Table Playground">
         <div class="mx-auto max-w-6xl space-y-8 px-4 py-8">
             <div
                 class="rounded-lg border bg-white p-5 text-sm text-ink-soft shadow-[var(--shadow-paper)]"

@@ -7,12 +7,7 @@ defineProps({ session: Object });
 
 <template>
     <Head title="Session Detail" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                {{ session.exam.title }}
-            </h2></template
-        >
+    <AuthenticatedLayout :title="session.exam.title">
         <div class="mx-auto max-w-4xl space-y-6 px-4 py-8">
             <div
                 v-if="session.score"

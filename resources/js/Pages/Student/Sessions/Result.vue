@@ -14,12 +14,7 @@ const statusCls = (s) =>
 
 <template>
     <Head title="Result" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                {{ session.exam.title }} — Result
-            </h2></template
-        >
+    <AuthenticatedLayout :title="`${session.exam.title} — Result`">
         <div class="mx-auto max-w-3xl space-y-6 px-4 py-8">
             <!-- summary card -->
             <div class="flex items-center gap-8 rounded-lg border bg-white p-6">

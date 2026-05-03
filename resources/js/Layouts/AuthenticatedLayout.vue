@@ -3,6 +3,10 @@ import { ref, computed, watch } from "vue";
 import { Link, usePage, router } from "@inertiajs/vue3";
 import BrandLogo from "@/Components/BrandLogo.vue";
 
+defineProps({
+    title: String,
+});
+
 const page = usePage();
 const user = computed(() => page.props.auth.user || {});
 const initials = computed(() => {
@@ -209,12 +213,16 @@ const logout = () => router.post(route("logout"));
                 </Link>
             </div>
 
-            <!-- Optional page header (legacy slot) -->
+            <!-- Optional page header -->
             <header
-                v-if="$slots.header"
+                v-if="title || $slots.header"
                 class="flex-shrink-0 border-b border-rule bg-ivory px-6 py-5 lg:px-9"
             >
-                <slot name="header" />
+                <slot name="header">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        {{ title }}
+                    </h2>
+                </slot>
             </header>
 
             <!-- Flash -->

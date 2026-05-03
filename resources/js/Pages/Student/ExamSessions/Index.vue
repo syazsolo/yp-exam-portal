@@ -25,12 +25,7 @@ const actions = [
 
 <template>
     <Head title="Exam History" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                My Exam Sessions
-            </h2></template
-        >
+    <AuthenticatedLayout title="My Exam Sessions">
         <div class="mx-auto max-w-4xl px-4 py-8">
             <DataTable
                 :columns="columns"

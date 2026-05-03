@@ -18,12 +18,7 @@ function toggleSubject(id) {
 
 <template>
     <Head title="Edit Class" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                Edit Class
-            </h2></template
-        >
+    <AuthenticatedLayout title="Edit Class">
         <div class="mx-auto max-w-lg px-4 py-8">
             <div class="space-y-4 rounded-lg border bg-white p-6">
                 <div>

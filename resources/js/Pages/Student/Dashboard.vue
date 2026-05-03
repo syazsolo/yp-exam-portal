@@ -32,12 +32,7 @@ function start(examId) {
 
 <template>
     <Head title="Dashboard" />
-    <AuthenticatedLayout>
-        <template #header
-            ><h2 class="text-xl font-semibold text-gray-800">
-                Dashboard
-            </h2></template
-        >
+    <AuthenticatedLayout title="Dashboard">
         <div class="mx-auto max-w-4xl space-y-8 px-4 py-8">
             <div
                 v-if="$page.props.flash?.success"
