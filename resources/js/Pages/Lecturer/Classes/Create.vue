@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 
-const props = defineProps({ subjects: Array });
+defineProps({ subjects: Array });
 const form = useForm({ name: "", subject_ids: [] });
 const submit = () => form.post(route("lecturer.classes.store"));
 

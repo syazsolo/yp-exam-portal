@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, Link } from "@inertiajs/vue3";
 
-const props = defineProps({
+defineProps({
     stats: Object,
     recentExams: Array,
     classes: Array,

@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, useForm, router } from "@inertiajs/vue3";
+import { Head, router } from "@inertiajs/vue3";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 
 const props = defineProps({ session: Object, answeredMap: Object });

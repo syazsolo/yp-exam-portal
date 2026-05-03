@@ -2,7 +2,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, useForm, Link } from "@inertiajs/vue3";
 
-const props = defineProps({ subjects: Array });
+defineProps({ subjects: Array });
 const form = useForm({
     title: "",
     subject_id: "",

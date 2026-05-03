@@ -17,8 +17,8 @@ import { Head, Link } from "@inertiajs/vue3";
                     Playground
                 </h1>
                 <p class="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">
-                    A simple place to keep UI experiments and component
-                    examples while the exam portal grows.
+                    A simple place to keep UI experiments and component examples
+                    while the exam portal grows.
                 </p>
                 <Link
                     :href="route('playground.tables')"
