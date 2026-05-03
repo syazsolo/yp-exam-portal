@@ -3,12 +3,21 @@
 namespace Tests\Feature\Student;
 
 use App\Models\ExamSession;
+use App\Models\SchoolClass;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExamHistoryTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function grantSessionExamAccess(ExamSession $session): void
+    {
+        $class = SchoolClass::factory()->create();
+
+        $session->student->classes()->attach($class->id, ['assigned_at' => now()]);
+        $class->subjects()->attach($session->exam->subject_id);
+    }
 
     // --- List past sessions ---
 
@@ -42,6 +51,7 @@ class ExamHistoryTest extends TestCase
     {
         $student = $this->createStudent();
         $session = ExamSession::factory()->scored()->create(['user_id' => $student->id]);
+        $this->grantSessionExamAccess($session);
 
         $response = $this->actingAs($student)
             ->get("/student/exam-sessions/{$session->id}");
@@ -53,6 +63,7 @@ class ExamHistoryTest extends TestCase
     {
         $student = $this->createStudent();
         $session = ExamSession::factory()->scored()->withAnswers()->create(['user_id' => $student->id]);
+        $this->grantSessionExamAccess($session);
 
         $response = $this->actingAs($student)
             ->get("/student/exam-sessions/{$session->id}");
@@ -65,6 +76,7 @@ class ExamHistoryTest extends TestCase
     {
         $student = $this->createStudent();
         $session = ExamSession::factory()->scored()->create(['user_id' => $student->id]);
+        $this->grantSessionExamAccess($session);
 
         $response = $this->actingAs($student)
             ->get("/student/exam-sessions/{$session->id}");

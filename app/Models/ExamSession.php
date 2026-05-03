@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Models\Concerns\Auditable;
 use App\States\ExamSession\ExamSessionState;
-use App\States\ExamSession\Invalid;
 use App\States\ExamSession\PendingReview;
 use App\States\ExamSession\Scored;
 use App\States\ExamSession\Submitted;
@@ -12,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Spatie\ModelStates\HasStates;
 
 class ExamSession extends Model
@@ -58,26 +58,43 @@ class ExamSession extends Model
         return $this->hasMany(Answer::class)->where('type', 'open_text');
     }
 
-    /** Called by student. Validates time window; marks Invalid if expired. */
+    public function deadline(): ?Carbon
+    {
+        $deadlines = collect();
+
+        if ($this->exam->time_limit_minutes && $this->started_at) {
+            $deadlines->push($this->started_at->copy()->addMinutes($this->exam->time_limit_minutes));
+        }
+
+        if ($this->exam->ends_at) {
+            $deadlines->push($this->exam->ends_at);
+        }
+
+        return $deadlines->sort()->first();
+    }
+
+    public function submitGraceDeadline(): ?Carbon
+    {
+        return $this->deadline()?->copy()->addSeconds((int) config('exam_sessions.submit_grace_seconds', 10));
+    }
+
+    public function canSaveAnswers(): bool
+    {
+        $deadline = $this->deadline();
+
+        return $deadline === null || now()->lessThanOrEqualTo($deadline);
+    }
+
+    public function shouldAutoSubmitAbandoned(): bool
+    {
+        $deadline = $this->submitGraceDeadline();
+
+        return $deadline !== null && now()->isAfter($deadline);
+    }
+
+    /** Called by student or browser auto-submit. */
     public function submit(): void
     {
-        $exam = $this->exam;
-
-        if ($exam->ends_at && now()->isAfter($exam->ends_at)) {
-            $this->state->transitionTo(Invalid::class);
-
-            return;
-        }
-
-        if ($exam->time_limit_minutes && $this->started_at) {
-            $deadline = $this->started_at->copy()->addMinutes($exam->time_limit_minutes);
-            if (now()->isAfter($deadline)) {
-                $this->state->transitionTo(Invalid::class);
-
-                return;
-            }
-        }
-
         $this->autoSubmit();
     }
 

@@ -23,15 +23,23 @@ class DashboardController extends Controller
         $availableExams = $noClass ? collect() : Exam::with('subject')
             ->whereIn('subject_id', $subjectIds)
             ->where('status', 'active')
-            ->whereDoesntHave('sessions', fn ($q) => $q->where('user_id', $student->id))
             ->get()
-            ->map(fn ($e) => [
-                'id' => $e->id,
-                'title' => $e->title,
-                'subject' => $e->subject->name,
-                'time_limit' => $e->time_limit_minutes,
-                'ends_at' => $e->ends_at,
-            ]);
+            ->map(function (Exam $exam) use ($student) {
+                $session = $exam->sessions()
+                    ->where('user_id', $student->id)
+                    ->latest()
+                    ->first();
+
+                return [
+                    'id' => $exam->id,
+                    'title' => $exam->title,
+                    'subject' => $exam->subject->name,
+                    'time_limit' => $exam->time_limit_minutes,
+                    'ends_at' => $exam->ends_at,
+                    'attempt_state' => $session ? (string) $session->state : null,
+                    'session_id' => $session?->id,
+                ];
+            });
 
         $mySessions = ExamSession::with(['exam.subject'])
             ->where('user_id', $student->id)

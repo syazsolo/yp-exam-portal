@@ -1,7 +1,7 @@
 <script setup>
 import DataTable from "@/Components/DataTable.vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import { Head, router } from "@inertiajs/vue3";
+import { Head, Link, router } from "@inertiajs/vue3";
 
 defineProps({ availableExams: Array, mySessions: Array });
 
@@ -24,9 +24,20 @@ const sessionActions = [
 ];
 
 function start(examId) {
-    if (confirm("Start this exam? The timer will begin immediately.")) {
-        router.post(route("student.exams.sessions.start", examId));
+    if (
+        confirm(
+            "Starting this exam begins the timer immediately. It cannot be paused, even if you leave or refresh.",
+        )
+    ) {
+        router.post(route("student.exams.start", examId));
     }
+}
+
+function examActionLabel(exam) {
+    if (exam.attempt_state === "pending") return "Return to Exam";
+    if (exam.attempt_state) return "View Result";
+
+    return "Start Exam";
 }
 </script>
 
@@ -73,11 +84,36 @@ function start(examId) {
                                 {{ new Date(e.ends_at).toLocaleString() }}
                             </p>
                         </div>
+                        <Link
+                            v-if="e.session_id && e.attempt_state !== 'pending'"
+                            :href="
+                                route(
+                                    'student.exam-sessions.show',
+                                    e.session_id,
+                                )
+                            "
+                            class="rounded bg-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
+                        >
+                            {{ examActionLabel(e) }}
+                        </Link>
+                        <Link
+                            v-else-if="e.session_id"
+                            :href="
+                                route(
+                                    'student.exam-sessions.show',
+                                    e.session_id,
+                                )
+                            "
+                            class="rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
+                        >
+                            {{ examActionLabel(e) }}
+                        </Link>
                         <button
+                            v-else
                             @click="start(e.id)"
                             class="rounded bg-gray-900 px-4 py-2 text-sm text-white hover:bg-gray-700"
                         >
-                            Start Exam
+                            {{ examActionLabel(e) }}
                         </button>
                     </div>
                 </div>

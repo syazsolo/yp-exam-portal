@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use App\Models\Exam;
 use App\Models\ExamSession;
 use App\Models\Question;
-use App\States\ExamSession\Invalid;
 use App\States\ExamSession\Pending;
 use App\States\ExamSession\PendingReview;
 use App\States\ExamSession\Scored;
@@ -71,7 +70,7 @@ class ExamSessionStateTest extends TestCase
 
     // --- Time limit / end time edge case ---
 
-    public function test_submitting_after_exam_end_time_marks_session_as_invalid(): void
+    public function test_submitting_after_exam_end_time_finalizes_saved_answers(): void
     {
         $exam = Exam::factory()->create([
             'starts_at' => now()->subHour(),
@@ -82,10 +81,9 @@ class ExamSessionStateTest extends TestCase
             'started_at' => now()->subHour(),
         ]);
 
-        // auto-submit job failed to run; student manually tries to submit
         $session->submit();
 
-        $this->assertInstanceOf(Invalid::class, $session->fresh()->state);
+        $this->assertInstanceOf(Scored::class, $session->fresh()->state);
     }
 
     // --- Lecturer scoring ---

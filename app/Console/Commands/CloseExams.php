@@ -15,18 +15,19 @@ class CloseExams extends Command
 
     public function handle(): void
     {
-        $endedExams = Exam::whereNotNull('ends_at')
-            ->where('ends_at', '<=', now())
-            ->pluck('id');
-
-        $sessions = ExamSession::whereIn('exam_id', $endedExams)
+        $sessions = ExamSession::query()
             ->whereState('state', Pending::class)
-            ->with(['exam.questions', 'answers'])
-            ->get();
+            ->with(['exam.questions', 'answers', 'exam'])
+            ->get()
+            ->filter(fn (ExamSession $session) => $session->shouldAutoSubmitAbandoned());
 
         foreach ($sessions as $session) {
             $session->autoSubmit();
         }
+
+        $endedExams = Exam::whereNotNull('ends_at')
+            ->where('ends_at', '<=', now())
+            ->pluck('id');
 
         $closed = Exam::whereIn('id', $endedExams)
             ->where('status', 'active')

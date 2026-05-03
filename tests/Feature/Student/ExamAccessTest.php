@@ -14,50 +14,43 @@ class ExamAccessTest extends TestCase
 
     // --- Student with class ---
 
-    public function test_student_can_see_exam_when_subject_is_in_their_class(): void
+    public function test_student_can_list_active_exam_when_subject_is_in_their_class(): void
     {
         $student = $this->createStudent();
         $class = SchoolClass::factory()->create();
         $subject = Subject::factory()->create();
-        $exam = Exam::factory()->create(['subject_id' => $subject->id]);
+        $exam = Exam::factory()->active()->create(['subject_id' => $subject->id]);
 
         $student->classes()->attach($class->id, ['assigned_at' => now()]);
         $class->subjects()->attach($subject->id);
 
         $response = $this->actingAs($student)
-            ->get("/student/exams/{$exam->id}");
+            ->get('/student/exams');
 
-        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Student/Exams/Index')
+            ->has('exams', 1)
+            ->where('exams.0.id', $exam->id)
+            ->where('exams.0.attempt_state', null)
+            ->where('exams.0.session_id', null));
     }
 
-    public function test_student_cannot_see_exam_when_subject_is_not_in_their_class(): void
+    public function test_student_does_not_list_exam_when_subject_is_not_in_their_class(): void
     {
         $student = $this->createStudent();
         $class = SchoolClass::factory()->create();
         $otherSubject = Subject::factory()->create();
-        $exam = Exam::factory()->create(['subject_id' => $otherSubject->id]);
+        Exam::factory()->active()->create(['subject_id' => $otherSubject->id]);
 
         $student->classes()->attach($class->id, ['assigned_at' => now()]);
-        // class has no subjects attached
 
         $response = $this->actingAs($student)
-            ->get("/student/exams/{$exam->id}");
+            ->get('/student/exams');
 
-        $response->assertForbidden();
+        $response->assertInertia(fn ($page) => $page->has('exams', 0));
     }
 
     // --- Student without class ---
-
-    public function test_student_with_no_class_cannot_access_any_exam(): void
-    {
-        $student = $this->createStudent();
-        $exam = Exam::factory()->create();
-
-        $response = $this->actingAs($student)
-            ->get("/student/exams/{$exam->id}");
-
-        $response->assertForbidden();
-    }
 
     public function test_student_with_no_class_cannot_list_exams(): void
     {

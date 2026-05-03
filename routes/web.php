@@ -66,8 +66,7 @@ Route::middleware(['auth', 'verified', 'student'])->prefix('student')->name('stu
     Route::get('dashboard', StudentDashboard::class)->name('dashboard.alias');
 
     Route::get('exams', [ExamSessionController::class, 'index'])->name('exams.index');
-    Route::get('exams/{exam}', [ExamSessionController::class, 'showExam'])->name('exams.show');
-    Route::post('exams/{exam}/sessions', [ExamSessionController::class, 'start'])->name('exams.sessions.start');
+    Route::post('exams/{exam}/start', [ExamSessionController::class, 'start'])->name('exams.start');
 
     Route::get('exam-sessions', [ExamSessionController::class, 'listSessions'])->name('exam-sessions.index');
     Route::get('exam-sessions/{session}', [ExamSessionController::class, 'showSession'])->name('exam-sessions.show');
