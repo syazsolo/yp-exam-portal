@@ -26,10 +26,6 @@ Route::get('/dashboard', function () {
     return redirect()->route(Auth::user()->dashboardRoute());
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/playground/tables', function () {
-    return Inertia::render('Playground/Tables');
-})->middleware(['auth', 'verified'])->name('playground.tables');
-
 // Admin routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::post('students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');
@@ -80,6 +76,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Playground routes
+Route::middleware(['auth', 'verified'])->prefix('playground')->name('playground.')->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Playground/Index');
+    })->name('index');
+
+    Route::get('tables', function () {
+        return Inertia::render('Playground/Tables');
+    })->name('tables');
 });
 
 require __DIR__.'/auth.php';
