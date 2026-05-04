@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Admin\ClassController as AdminClassController;
 use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Lecturer\ClassController;
@@ -11,6 +12,9 @@ use App\Http\Controllers\Lecturer\SubjectController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Student\ExamSessionController;
+use App\Models\SchoolClass;
+use App\Models\Subject;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -30,7 +34,72 @@ Route::get('/dashboard', function () {
 // Admin routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', function () {
-        return Inertia::render('Admin/Dashboard');
+        $classes = SchoolClass::query()
+            ->with(['subjects:id,name'])
+            ->withCount([
+                'students as active_students_count' => fn ($query) => $query->whereNull('class_user.unassigned_at'),
+            ])
+            ->orderBy('name')
+            ->get()
+            ->map(fn (SchoolClass $class) => [
+                'id' => $class->id,
+                'name' => $class->name,
+                'subject_ids' => $class->subjects->pluck('id')->values(),
+                'subjects' => $class->subjects
+                    ->map(fn (Subject $subject) => [
+                        'id' => $subject->id,
+                        'name' => $subject->name,
+                    ])
+                    ->values(),
+                'active_students_count' => $class->active_students_count,
+            ])
+            ->values();
+
+        $subjects = Subject::query()
+            ->with('creator:id,name')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Subject $subject) => [
+                'id' => $subject->id,
+                'name' => $subject->name,
+                'creator' => [
+                    'id' => $subject->creator?->id,
+                    'name' => $subject->creator?->name,
+                ],
+            ])
+            ->values();
+
+        $students = User::query()
+            ->where('role', UserRole::Student->value)
+            ->with([
+                'classes' => fn ($query) => $query
+                    ->whereNull('class_user.unassigned_at')
+                    ->select('school_classes.id', 'school_classes.name'),
+            ])
+            ->orderBy('name')
+            ->get()
+            ->map(function (User $student) {
+                $activeClass = $student->classes->first();
+
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'active_class' => $activeClass
+                        ? [
+                            'id' => $activeClass->id,
+                            'name' => $activeClass->name,
+                        ]
+                        : null,
+                ];
+            })
+            ->values();
+
+        return Inertia::render('Admin/Dashboard', [
+            'classes' => $classes,
+            'subjects' => $subjects,
+            'students' => $students,
+        ]);
     })->name('dashboard');
 
     Route::post('students/{student}/enroll', [EnrollmentController::class, 'enroll'])->name('students.enroll');

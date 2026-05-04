@@ -6,6 +6,7 @@ use App\Models\SchoolClass;
 use App\Models\Subject;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class ClassManagementTest extends TestCase
@@ -36,6 +37,43 @@ class ClassManagementTest extends TestCase
                 ->where('user_id', $student->id)
                 ->where('class_id', $class->id)
                 ->value('assigned_at')
+        );
+    }
+
+    public function test_admin_dashboard_exposes_class_management_data(): void
+    {
+        $admin = $this->createAdmin();
+        $lecturer = $this->createLecturer();
+        $student = $this->createStudent();
+        $subject = Subject::factory()->create([
+            'name' => 'Applied Mathematics',
+            'created_by' => $lecturer->id,
+        ]);
+        $class = SchoolClass::factory()->create([
+            'name' => 'Form 5 Science',
+            'created_by' => $admin->id,
+        ]);
+
+        $class->subjects()->attach($subject->id);
+        $student->classes()->attach($class->id, ['assigned_at' => now()]);
+
+        $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Dashboard')
+            ->has('classes', 1)
+            ->where('classes.0.id', $class->id)
+            ->where('classes.0.name', 'Form 5 Science')
+            ->where('classes.0.subject_ids.0', $subject->id)
+            ->where('classes.0.subjects.0.name', 'Applied Mathematics')
+            ->where('classes.0.active_students_count', 1)
+            ->has('subjects', 1)
+            ->where('subjects.0.id', $subject->id)
+            ->where('subjects.0.creator.name', $lecturer->name)
+            ->has('students', 1)
+            ->where('students.0.id', $student->id)
+            ->where('students.0.active_class.id', $class->id)
         );
     }
 
