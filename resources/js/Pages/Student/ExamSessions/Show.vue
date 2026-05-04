@@ -26,7 +26,7 @@ defineProps({ session: Object });
             >
                 <div class="font-medium">{{ a.question.text }}</div>
                 <div class="mb-2 text-sm text-gray-500">
-                    Worth {{ a.question.weight }}
+                    Points: {{ a.question.weight }}
                 </div>
                 <div v-if="a.selected_option" class="text-sm">
                     Selected:
