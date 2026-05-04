@@ -61,6 +61,10 @@ class ReviewController extends Controller
             $answer->update(['reviewer_comment' => $data['reviewer_comment']]);
         }
 
+        if ($request->expectsJson()) {
+            return response()->noContent();
+        }
+
         return redirect()->back()->with('success', 'Answer scored.');
     }
 

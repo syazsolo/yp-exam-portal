@@ -207,6 +207,25 @@ class ExamCreationTest extends TestCase
         ]);
     }
 
+    public function test_lecturer_can_assign_score_with_background_json_request(): void
+    {
+        $lecturer = $this->createLecturer();
+        $answer = $this->openTextAnswerOwnedBy($lecturer, 10.0);
+
+        $response = $this->actingAs($lecturer)
+            ->patchJson("/lecturer/answers/{$answer->id}/score", [
+                'score' => 7.0,
+                'reviewer_comment' => 'Clear algorithm.',
+            ]);
+
+        $response->assertNoContent();
+        $this->assertDatabaseHas('answers', [
+            'id' => $answer->id,
+            'score' => 7.0,
+            'reviewer_comment' => 'Clear algorithm.',
+        ]);
+    }
+
     public function test_lecturer_cannot_assign_score_above_question_weight(): void
     {
         $lecturer = $this->createLecturer();
