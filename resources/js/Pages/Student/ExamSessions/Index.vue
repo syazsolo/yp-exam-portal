@@ -6,20 +6,15 @@ import { Head } from "@inertiajs/vue3";
 defineProps({ sessions: Array });
 
 const columns = [
-    { key: "exam_title", label: "Exam", type: "primary" },
+    {
+        key: "exam_title",
+        label: "Exam",
+        type: "link",
+        href: (session) => route("student.exam-sessions.show", session.id),
+    },
     { key: "subject", label: "Subject" },
     { key: "state", label: "Status", type: "status" },
     { key: "score_label", label: "Score" },
-];
-
-const actions = [
-    {
-        name: "view",
-        icon: "eye",
-        label: "View",
-        variant: "primary",
-        href: (session) => route("student.exam-sessions.show", session.id),
-    },
 ];
 </script>
 
@@ -30,7 +25,7 @@ const actions = [
             <DataTable
                 :columns="columns"
                 :rows="sessions"
-                :actions="actions"
+                :actions="[]"
                 empty-message="No past sessions."
             />
         </div>

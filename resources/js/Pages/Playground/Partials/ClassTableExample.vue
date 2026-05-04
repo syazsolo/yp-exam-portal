@@ -22,7 +22,12 @@ const rows = [
 ];
 
 const columns = [
-    { key: "name", label: "Class", type: "primary" },
+    {
+        key: "name",
+        label: "Class",
+        type: "link",
+        href: () => route("playground.tables"),
+    },
     {
         key: "students",
         label: "Students",

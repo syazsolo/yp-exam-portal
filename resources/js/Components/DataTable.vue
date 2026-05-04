@@ -201,7 +201,7 @@ function onAction(action, row) {
                                 <Link
                                     v-if="column.type === 'link'"
                                     :href="linkFor(row, column)"
-                                    class="font-semibold text-ink transition hover:text-oxblood"
+                                    class="font-semibold text-ink underline decoration-ink/25 underline-offset-4 transition hover:text-oxblood hover:decoration-oxblood focus:outline-none focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-oxblood/30"
                                 >
                                     {{ displayValue(row, column) }}
                                 </Link>

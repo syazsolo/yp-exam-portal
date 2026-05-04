@@ -6,22 +6,17 @@ import { Head, Link, router } from "@inertiajs/vue3";
 defineProps({ availableExams: Array, mySessions: Array });
 
 const sessionColumns = [
-    { key: "exam_title", label: "Exam", type: "primary" },
+    {
+        key: "exam_title",
+        label: "Exam",
+        type: "link",
+        href: (session) => route("student.exam-sessions.show", session.id),
+    },
     { key: "subject", label: "Subject" },
     { key: "state", label: "Status", type: "status" },
     { key: "score_label", label: "Score" },
 ];
 
-const sessionActions = [
-    {
-        name: "open",
-        icon: "eye",
-        label: (session) => (session.state === "pending" ? "Continue" : "View"),
-        variant: (session) =>
-            session.state === "pending" ? "primary" : "default",
-        href: (session) => route("student.exam-sessions.show", session.id),
-    },
-];
 
 function start(examId) {
     if (
@@ -125,7 +120,7 @@ function examActionLabel(exam) {
                 <DataTable
                     :columns="sessionColumns"
                     :rows="mySessions"
-                    :actions="sessionActions"
+                    :actions="[]"
                     empty-message="No attempts yet."
                 />
             </div>

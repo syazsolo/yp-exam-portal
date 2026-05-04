@@ -6,7 +6,12 @@ import { Head } from "@inertiajs/vue3";
 defineProps({ classes: Array });
 
 const columns = [
-    { key: "name", label: "Class", type: "primary" },
+    {
+        key: "name",
+        label: "Class",
+        type: "link",
+        href: (schoolClass) => route("lecturer.classes.show", schoolClass.id),
+    },
     {
         key: "students",
         label: "Students",
@@ -20,15 +25,6 @@ const columns = [
     },
 ];
 
-const actions = [
-    {
-        type: "view",
-        label: "View",
-        icon: "settings",
-        href: (schoolClass) => route("lecturer.classes.show", schoolClass.id),
-        variant: "primary",
-    },
-];
 </script>
 
 <template>
@@ -44,7 +40,7 @@ const actions = [
             <DataTable
                 :columns="columns"
                 :rows="classes"
-                :actions="actions"
+                :actions="[]"
                 empty-message="No assigned classes yet."
             />
         </div>
