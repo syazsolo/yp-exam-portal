@@ -1,0 +1,116 @@
+name: yp-exam-portal-demo
+
+# Demo-only encryption key. Single source of truth for both the image build
+# (Vite/Composer post-install) and the runtime container environment.
+# DO NOT reuse this key outside the demo stack.
+x-app-key: &app-key "base64:RyYTpZ+KzQnX9HllpMEoK9q3l7K4w0rcT3yH7TdwjAs="
+
+x-app-image: &app-image yp-exam-portal:demo
+
+x-app-build: &app-build
+  context: .
+  dockerfile: docker/demo.Dockerfile
+  args:
+    APP_KEY: *app-key
+    VITE_APP_NAME: "YP Exam Portal"
+
+x-app-environment: &app-environment
+  APP_NAME: "YP Exam Portal"
+  APP_ENV: local
+  APP_KEY: *app-key
+  APP_DEBUG: "true"
+  APP_URL: http://localhost:8000
+  APP_TIMEZONE: UTC
+  LOG_CHANNEL: stderr
+  DB_CONNECTION: mysql
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  DB_DATABASE: yp_exam_portal
+  DB_USERNAME: yp_exam_portal
+  DB_PASSWORD: secret
+  SESSION_DRIVER: database
+  CACHE_STORE: database
+  QUEUE_CONNECTION: database
+  MAIL_MAILER: log
+  BROADCAST_CONNECTION: log
+  FILESYSTEM_DISK: local
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: yp_exam_portal
+      MYSQL_USER: yp_exam_portal
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - demo-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  init:
+    image: *app-image
+    build: *app-build
+    environment: *app-environment
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: sh /usr/local/bin/demo-init.sh
+
+  app:
+    image: *app-image
+    build: *app-build
+    environment: *app-environment
+    ports:
+      - "8000:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+    # --no-reload disables artisan serve's env-stripping reload watcher so the
+    # APP_KEY/DB_* values from `environment:` reach the HTTP request lifecycle.
+    command: php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/login >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    restart: unless-stopped
+
+  scheduler:
+    image: *app-image
+    build: *app-build
+    environment: *app-environment
+    depends_on:
+      mysql:
+        condition: service_healthy
+      init:
+        condition: service_completed_successfully
+    command: php artisan schedule:work
+    restart: unless-stopped
+
+  test:
+    image: *app-image
+    build: *app-build
+    profiles: ["tools"]
+    environment:
+      <<: *app-environment
+      APP_ENV: testing
+      APP_URL: http://localhost
+      DB_DATABASE: yp_exam_portal_testing
+      SESSION_DRIVER: array
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+    depends_on:
+      mysql:
+        condition: service_healthy
+    command: sh /usr/local/bin/demo-test.sh
+
+volumes:
+  demo-mysql:
