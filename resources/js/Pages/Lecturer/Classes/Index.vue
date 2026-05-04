@@ -24,7 +24,6 @@ const columns = [
         empty: "None",
     },
 ];
-
 </script>
 
 <template>

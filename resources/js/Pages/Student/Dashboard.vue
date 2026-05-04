@@ -17,7 +17,6 @@ const sessionColumns = [
     { key: "score_label", label: "Score" },
 ];
 
-
 function start(examId) {
     if (
         confirm(
