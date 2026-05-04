@@ -27,13 +27,6 @@ const studentColumns = [
             </div>
         </template>
         <div class="mx-auto max-w-4xl space-y-6 px-4 py-8">
-            <div
-                v-if="$page.props.flash?.success"
-                class="rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
-            >
-                {{ $page.props.flash.success }}
-            </div>
-
             <!-- subjects -->
             <div class="rounded-lg border bg-white p-5">
                 <h3 class="mb-3 font-semibold text-gray-700">Subjects</h3>

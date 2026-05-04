@@ -39,13 +39,6 @@ function examActionLabel(exam) {
     <Head title="Dashboard" />
     <AuthenticatedLayout title="Dashboard">
         <div class="w-full space-y-8 px-5 py-6 sm:px-9 sm:py-8">
-            <div
-                v-if="$page.props.flash?.success"
-                class="rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
-            >
-                {{ $page.props.flash.success }}
-            </div>
-
             <!-- available exams -->
             <div>
                 <h3 class="mb-3 font-semibold text-gray-700">

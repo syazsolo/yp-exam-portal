@@ -192,13 +192,6 @@ function finalize() {
 
         <div class="mx-auto max-w-3xl space-y-4 px-4 py-8">
             <div
-                v-if="$page.props.flash?.success"
-                class="rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
-            >
-                {{ $page.props.flash.success }}
-            </div>
-
-            <div
                 v-for="(answer, i) in session.answers"
                 :key="answer.id"
                 class="space-y-3 rounded-lg border bg-white p-5"

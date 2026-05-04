@@ -52,13 +52,6 @@ function destroyQuestion(qid) {
         </template>
 
         <div class="mx-auto max-w-5xl space-y-6 px-4 py-8">
-            <div
-                v-if="$page.props.flash?.success"
-                class="rounded border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-800"
-            >
-                {{ $page.props.flash.success }}
-            </div>
-
             <!-- meta -->
             <div
                 class="flex flex-wrap gap-6 rounded-lg border bg-white p-5 text-sm text-gray-600"
