@@ -151,6 +151,10 @@ class ExamSessionController extends Controller
             )
         );
 
+        if ($request->expectsJson()) {
+            return response()->noContent();
+        }
+
         return redirect()->back();
     }
 

@@ -216,6 +216,31 @@ class ExamTakingTest extends TestCase
         ]);
     }
 
+    public function test_student_can_save_answer_with_background_json_request(): void
+    {
+        [$student, $exam] = $this->studentWithExamAccess();
+        $question = $exam->questions()->first();
+        $option = $question->options()->first();
+        $session = ExamSession::factory()->pending()->create([
+            'exam_id' => $exam->id,
+            'user_id' => $student->id,
+            'started_at' => now()->subMinutes(5),
+        ]);
+
+        $response = $this->actingAs($student)
+            ->postJson("/student/exam-sessions/{$session->id}/answers", [
+                'question_id' => $question->id,
+                'selected_option_id' => $option->id,
+            ]);
+
+        $response->assertNoContent();
+        $this->assertDatabaseHas('answers', [
+            'exam_session_id' => $session->id,
+            'question_id' => $question->id,
+            'selected_option_id' => $option->id,
+        ]);
+    }
+
     public function test_student_cannot_save_answer_after_deadline(): void
     {
         [$student, $exam] = $this->studentWithExamAccess(['time_limit_minutes' => 30]);

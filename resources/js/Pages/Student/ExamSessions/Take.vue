@@ -1,15 +1,27 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { Head, router } from "@inertiajs/vue3";
+import axios from "axios";
 import { computed, onMounted, onUnmounted, ref } from "vue";
+import {
+    cloneAnswerMap,
+    hasDraftAnswer,
+    hasSavedAnswer,
+    isAnswerDirty,
+    normalizedAnswer,
+} from "./answer-state.js";
 
 const props = defineProps({ session: Object, answeredMap: Object });
 
-const answers = ref({ ...props.answeredMap });
-const savedAnswers = ref({ ...props.answeredMap });
+const answers = ref(cloneAnswerMap(props.answeredMap));
+const savedAnswers = ref(cloneAnswerMap(props.answeredMap));
+const savingAnswers = ref({});
+const saveErrors = ref({});
 const remaining = ref(0);
 const submitting = ref(false);
 let timer = null;
+const saveTimers = {};
+const retryTimers = {};
 
 const isExpired = computed(() => remaining.value <= 0);
 const unansweredMcqCount = computed(
@@ -55,44 +67,131 @@ onMounted(() => {
     timer = setInterval(tick, 1000);
 });
 
-onUnmounted(() => clearInterval(timer));
+onUnmounted(() => {
+    clearInterval(timer);
+    Object.values(saveTimers).forEach(clearTimeout);
+    Object.values(retryTimers).forEach(clearTimeout);
+});
 
-function selectOption(questionId, optionId) {
-    if (isExpired.value) return;
-    if (!answers.value[questionId]) answers.value[questionId] = {};
-    answers.value[questionId].selected_option_id = optionId;
+function setDraftAnswer(questionId, answer) {
+    answers.value = {
+        ...answers.value,
+        [questionId]: {
+            ...(answers.value[questionId] ?? {}),
+            ...answer,
+        },
+    };
 }
 
-function updateTextAnswer(questionId, value) {
+function selectOption(question, optionId) {
     if (isExpired.value) return;
-    if (!answers.value[questionId]) answers.value[questionId] = {};
-    answers.value[questionId].text_answer = value;
+    setDraftAnswer(question.id, { selected_option_id: optionId });
+    scheduleSave(question, 0);
 }
 
-function saveAnswer(question) {
-    if (isExpired.value || submitting.value) return;
+function updateTextAnswer(question, value) {
+    if (isExpired.value) return;
+    setDraftAnswer(question.id, { text_answer: value });
+    scheduleSave(question, 1000);
+}
 
-    const payload = { question_id: question.id };
-    if (question.type === "mcq") {
-        payload.selected_option_id =
-            answers.value[question.id]?.selected_option_id ?? null;
-    } else {
-        payload.text_answer = answers.value[question.id]?.text_answer ?? "";
+function shouldSaveAnswer(question) {
+    return (
+        !isExpired.value &&
+        !submitting.value &&
+        !savingAnswers.value[question.id] &&
+        isAnswerDirty(question, answers.value, savedAnswers.value)
+    );
+}
+
+function answerStatusLabel(question) {
+    if (savingAnswers.value[question.id]) return "saving...";
+    if (saveErrors.value[question.id]) return saveErrors.value[question.id];
+    if (isAnswerDirty(question, answers.value, savedAnswers.value)) {
+        return "unsaved changes";
+    }
+    if (hasSavedAnswer(question, savedAnswers.value)) return "saved";
+
+    return "not answered";
+}
+
+function answerStatusClass(question) {
+    if (saveErrors.value[question.id]) return "text-red-600";
+    if (savingAnswers.value[question.id]) return "text-gray-500";
+    if (isAnswerDirty(question, answers.value, savedAnswers.value)) {
+        return "text-amber-700";
+    }
+    if (hasSavedAnswer(question, savedAnswers.value)) return "text-green-600";
+
+    return "text-gray-400";
+}
+
+function scheduleSave(question, delay) {
+    clearTimeout(saveTimers[question.id]);
+    clearTimeout(retryTimers[question.id]);
+
+    if (
+        !hasDraftAnswer(question, answers.value) &&
+        !hasSavedAnswer(question, savedAnswers.value)
+    ) {
+        return;
     }
 
-    router.post(
-        route("student.exam-sessions.answers.save", props.session.id),
-        payload,
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                savedAnswers.value = {
-                    ...savedAnswers.value,
-                    [question.id]: { ...answers.value[question.id] },
-                };
-            },
-        },
-    );
+    saveTimers[question.id] = setTimeout(() => saveAnswer(question), delay);
+}
+
+async function saveAnswer(question) {
+    if (!shouldSaveAnswer(question)) return;
+
+    const payload = { question_id: question.id };
+    const snapshot = normalizedAnswer(question, answers.value);
+
+    if (question.type === "mcq") {
+        payload.selected_option_id = snapshot.selected_option_id;
+    } else {
+        payload.text_answer = snapshot.text_answer;
+    }
+
+    savingAnswers.value = {
+        ...savingAnswers.value,
+        [question.id]: true,
+    };
+    saveErrors.value = {
+        ...saveErrors.value,
+        [question.id]: null,
+    };
+
+    try {
+        await axios.post(
+            route("student.exam-sessions.answers.save", props.session.id),
+            payload,
+            { headers: { Accept: "application/json" } },
+        );
+        savedAnswers.value = {
+            ...savedAnswers.value,
+            [question.id]: { ...snapshot },
+        };
+    } catch {
+        saveErrors.value = {
+            ...saveErrors.value,
+            [question.id]: "save interrupted",
+        };
+    } finally {
+        savingAnswers.value = {
+            ...savingAnswers.value,
+            [question.id]: false,
+        };
+
+        if (
+            isAnswerDirty(question, answers.value, savedAnswers.value) &&
+            !isExpired.value
+        ) {
+            retryTimers[question.id] = setTimeout(
+                () => saveAnswer(question),
+                2500,
+            );
+        }
+    }
 }
 
 function submit(confirmFirst = true) {
@@ -175,11 +274,8 @@ function submit(confirmFirst = true) {
                     >
                         {{ q.points }} pt{{ q.points !== 1 ? "s" : "" }}
                     </span>
-                    <span
-                        v-if="savedAnswers[q.id]"
-                        class="text-xs text-green-600"
-                    >
-                        answered
+                    <span class="text-xs" :class="answerStatusClass(q)">
+                        {{ answerStatusLabel(q) }}
                     </span>
                 </div>
 
@@ -205,7 +301,7 @@ function submit(confirmFirst = true) {
                             "
                             :disabled="isExpired || submitting"
                             class="shrink-0"
-                            @change="selectOption(q.id, opt.id)"
+                            @change="selectOption(q, opt.id)"
                         />
                         {{ opt.body }}
                     </label>
@@ -218,16 +314,9 @@ function submit(confirmFirst = true) {
                     rows="4"
                     placeholder="Type your answer here..."
                     class="w-full rounded border px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 disabled:bg-gray-50"
-                    @input="updateTextAnswer(q.id, $event.target.value)"
+                    @blur="scheduleSave(q, 0)"
+                    @input="updateTextAnswer(q, $event.target.value)"
                 />
-
-                <button
-                    :disabled="isExpired || submitting"
-                    class="rounded bg-gray-100 px-3 py-1 text-xs text-gray-700 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    @click="saveAnswer(q)"
-                >
-                    Save Answer
-                </button>
             </div>
 
             <div class="flex justify-end">
